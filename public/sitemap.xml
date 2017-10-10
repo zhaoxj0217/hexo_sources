@@ -2,9 +2,23 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
-    <loc>http://yoursite.com/2017/08/22/hello-world/</loc>
+    <loc>http://zhaoxj0217.github.io/2017/10/09/%E6%B5%8B%E8%AF%95%E6%96%87%E6%A1%A3/</loc>
     
-    <lastmod>2017-08-22T03:06:01.688Z</lastmod>
+    <lastmod>2017-10-10T06:13:24.667Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://zhaoxj0217.github.io/2017/10/09/test-post/</loc>
+    
+    <lastmod>2017-10-10T02:07:05.120Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://zhaoxj0217.github.io/Tags/index.html</loc>
+    
+    <lastmod>2017-10-09T10:29:55.461Z</lastmod>
     
   </url>
   

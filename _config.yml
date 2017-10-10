@@ -3,19 +3,18 @@
 ## Source: https://github.com/hexojs/hexo/
 
 # Site
-title: Zhaoxj0217_blog
-subtitle:Zhaoxj0217_blog
-description:Asia/Shanghai
+title: zhaoxj0217_blog
+#subtitle:  
 author: zhaoxj0217
-language:
-timezone:
+language: zh-Hans
+#timezone:
 
 # URL
 ## If your site is put in a subdirectory, set url as 'http://yoursite.com/child' and root as '/child/'
-url: http://yoursite.com
+url: http://zhaoxj0217.github.io
 root: /
-permalink: :year/:month/:day/:title/
-permalink_defaults:
+#permalink: :year/:month/:day/:title/
+#permalink_defaults:
 
 # Directory
 source_dir: source
@@ -25,21 +24,24 @@ archive_dir: archives
 category_dir: categories
 code_dir: downloads/code
 i18n_dir: :lang
-skip_render:
+#skip_render: 
 
 # Writing
-new_post_name: :title.md # File name of new posts
+# File name of new posts
+new_post_name: :title.md
 default_layout: post
-titlecase: false # Transform title into titlecase
-external_link: true # Open external links in new tab
+# Transform title into titlecase
+titlecase: false 
+# Open external links in new tab
+external_link: true 
 filename_case: 0
 render_drafts: false
-post_asset_folder: false
+post_asset_folder: true
 relative_link: false
 future: true
 highlight:
   enable: true
-  line_number: true
+  line_number: false
   auto_detect: false
   tab_replace:
   
@@ -54,8 +56,8 @@ index_generator:
   
 # Category & Tag
 default_category: uncategorized
-category_map:
-tag_map:
+#category_map:
+#tag_map:
 
 # Date / Time format
 ## Hexo uses Moment.js to parse and display date
@@ -72,7 +74,7 @@ pagination_dir: page
 # Extensions
 ## Plugins: https://hexo.io/plugins/
 ## Themes: https://hexo.io/themes/
-theme: landscape
+theme: next
 
 # Deployment
 ## Docs: https://hexo.io/docs/deployment.html
