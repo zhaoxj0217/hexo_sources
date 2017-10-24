@@ -146,7 +146,7 @@ links_layout: block
 # Sidebar Avatar
 # in theme directory(source/images): /images/avatar.gif
 # in site  directory(source/uploads): /uploads/avatar.gif
-#avatar: /images/avatar.gif
+avatar: /images/head.jpg
 
 # Table Of Contents in the Sidebar
 toc:
@@ -476,7 +476,7 @@ duoshuo_info:
   ua_enable: true
   admin_enable: false
   user_id: 0
-  #admin_nickname: Author
+  admin_nickname: ½­½«½´
 
 # Post widgets & FB/VK comments settings.
 # ---------------------------------------------------------------

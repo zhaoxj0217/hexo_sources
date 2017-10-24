@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://zhaoxj0217.github.io/"/>
-  <updated>2017-10-10T02:07:05.120Z</updated>
+  <updated>2017-10-24T09:48:19.409Z</updated>
   <id>http://zhaoxj0217.github.io/</id>
   
   <author>
@@ -16,38 +16,34 @@
   <generator uri="http://hexo.io/">Hexo</generator>
   
   <entry>
-    <title>test-post</title>
-    <link href="http://zhaoxj0217.github.io/2017/10/09/test-post/"/>
-    <id>http://zhaoxj0217.github.io/2017/10/09/test-post/</id>
-    <published>2017-10-09T10:36:38.000Z</published>
-    <updated>2017-10-10T02:07:05.120Z</updated>
+    <title>机器学习参考地址</title>
+    <link href="http://zhaoxj0217.github.io/2017/10/24/Machine_Learning_Url/"/>
+    <id>http://zhaoxj0217.github.io/2017/10/24/Machine_Learning_Url/</id>
+    <published>2017-10-24T08:59:11.698Z</published>
+    <updated>2017-10-24T09:48:19.409Z</updated>
+    
+    <content type="html"><![CDATA[<p><a href="http://www.cnblogs.com/steven-yang/p/6348112.html" title="机器学习中的基本数学知识 - SNYang - 博客园" target="_blank" rel="external">机器学习中的基本数学知识 - SNYang - 博客园</a></p>
+<p><a href="https://zhuanlan.zhihu.com/p/25197792" title="机器学习理论篇1：机器学习的数学基础 - 知乎专栏" target="_blank" rel="external">机器学习理论篇1：机器学习的数学基础 - 知乎专栏</a></p>
+<p><a href="https://zhuanlan.zhihu.com/p/24799837" target="_blank" rel="external">数据科学入门篇1：数据科学完整学习路径 - 知乎专栏</a></p>
+<p><a href="http://www.jianshu.com/p/ed9ae5385b89" target="_blank" rel="external">浅谈机器学习基础（上）</a></p>
+<p><a href="http://www.jianshu.com/p/0359e3b7bb1b" target="_blank" rel="external">浅谈机器学习基础（下）</a></p>
+<p><a href="http://python.jobbole.com/84326/" title="利用Python，四步掌握机器学习 - Python - 伯乐在线" target="_blank" rel="external">利用Python，四步掌握机器学习 - Python - 伯乐在线</a></p>
+<p><a href="https://www.liaoxuefeng.com/wiki/001374738125095c955c1e6d8bb493182103fac9270762a000" title="Python 2.7教程 - 廖雪峰的官方网站" target="_blank" rel="external">Python 2.7教程 - 廖雪峰的官方网站</a></p>
+<p><a href="http://blog.csdn.net/dinosoft/article/details/34960693" title="cs229 斯坦福机器学习笔记（一）-- 入门与LR模型 - CSDN博客" target="_blank" rel="external">cs229 斯坦福机器学习笔记（一）– 入门与LR模型 - CSDN博客</a></p>
+<p><a href="https://www.coursera.org/learn/machine-learning?authMode=signup" title="机器学习 | Coursera" target="_blank" rel="external">机器学习 | Coursera</a></p>
+<p><a href="http://www.cnblogs.com/ello/archive/2012/04/28/2475419.html" title="浅析人脸检测之Haar分类器方法 - ello - 博客园" target="_blank" rel="external">浅析人脸检测之Haar分类器方法 - ello - 博客园</a></p>
+]]></content>
     
     <summary type="html">
     
-    </summary>
-    
-    
-      <category term="Movies" scheme="http://zhaoxj0217.github.io/tags/Movies/"/>
-    
-      <category term="Life" scheme="http://zhaoxj0217.github.io/tags/Life/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>测试文档</title>
-    <link href="http://zhaoxj0217.github.io/2017/10/09/%E6%B5%8B%E8%AF%95%E6%96%87%E6%A1%A3/"/>
-    <id>http://zhaoxj0217.github.io/2017/10/09/测试文档/</id>
-    <published>2017-10-09T10:36:38.000Z</published>
-    <updated>2017-10-10T06:13:24.667Z</updated>
-    
-    <summary type="html">
+      &lt;p&gt;&lt;a href=&quot;http://www.cnblogs.com/steven-yang/p/6348112.html&quot; title=&quot;机器学习中的基本数学知识 - SNYang - 博客园&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;机器学习中的基本数学
     
     </summary>
     
+      <category term="Machine Learning" scheme="http://zhaoxj0217.github.io/categories/Machine-Learning/"/>
     
-      <category term="Movies" scheme="http://zhaoxj0217.github.io/tags/Movies/"/>
     
-      <category term="Life" scheme="http://zhaoxj0217.github.io/tags/Life/"/>
+      <category term="Machine Learning" scheme="http://zhaoxj0217.github.io/tags/Machine-Learning/"/>
     
   </entry>
   
