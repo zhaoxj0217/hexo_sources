@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://zhaoxj0217.github.io/"/>
-  <updated>2017-10-24T09:48:19.409Z</updated>
+  <updated>2017-11-06T02:13:36.676Z</updated>
   <id>http://zhaoxj0217.github.io/</id>
   
   <author>
@@ -16,27 +16,683 @@
   <generator uri="http://hexo.io/">Hexo</generator>
   
   <entry>
-    <title>机器学习参考地址</title>
-    <link href="http://zhaoxj0217.github.io/2017/10/24/Machine_Learning_Url/"/>
-    <id>http://zhaoxj0217.github.io/2017/10/24/Machine_Learning_Url/</id>
-    <published>2017-10-24T08:59:11.698Z</published>
-    <updated>2017-10-24T09:48:19.409Z</updated>
+    <title>Mysql 执行优化—mysql</title>
+    <link href="http://zhaoxj0217.github.io/2017/11/05/mysql_optimize_execute/"/>
+    <id>http://zhaoxj0217.github.io/2017/11/05/mysql_optimize_execute/</id>
+    <published>2017-11-05T07:39:48.278Z</published>
+    <updated>2017-11-06T02:13:36.676Z</updated>
     
-    <content type="html"><![CDATA[<p><a href="http://www.cnblogs.com/steven-yang/p/6348112.html" title="机器学习中的基本数学知识 - SNYang - 博客园" target="_blank" rel="external">机器学习中的基本数学知识 - SNYang - 博客园</a></p>
-<p><a href="https://zhuanlan.zhihu.com/p/25197792" title="机器学习理论篇1：机器学习的数学基础 - 知乎专栏" target="_blank" rel="external">机器学习理论篇1：机器学习的数学基础 - 知乎专栏</a></p>
-<p><a href="https://zhuanlan.zhihu.com/p/24799837" target="_blank" rel="external">数据科学入门篇1：数据科学完整学习路径 - 知乎专栏</a></p>
-<p><a href="http://www.jianshu.com/p/ed9ae5385b89" target="_blank" rel="external">浅谈机器学习基础（上）</a></p>
-<p><a href="http://www.jianshu.com/p/0359e3b7bb1b" target="_blank" rel="external">浅谈机器学习基础（下）</a></p>
-<p><a href="http://python.jobbole.com/84326/" title="利用Python，四步掌握机器学习 - Python - 伯乐在线" target="_blank" rel="external">利用Python，四步掌握机器学习 - Python - 伯乐在线</a></p>
-<p><a href="https://www.liaoxuefeng.com/wiki/001374738125095c955c1e6d8bb493182103fac9270762a000" title="Python 2.7教程 - 廖雪峰的官方网站" target="_blank" rel="external">Python 2.7教程 - 廖雪峰的官方网站</a></p>
-<p><a href="http://blog.csdn.net/dinosoft/article/details/34960693" title="cs229 斯坦福机器学习笔记（一）-- 入门与LR模型 - CSDN博客" target="_blank" rel="external">cs229 斯坦福机器学习笔记（一）– 入门与LR模型 - CSDN博客</a></p>
-<p><a href="https://www.coursera.org/learn/machine-learning?authMode=signup" title="机器学习 | Coursera" target="_blank" rel="external">机器学习 | Coursera</a></p>
-<p><a href="http://www.cnblogs.com/ello/archive/2012/04/28/2475419.html" title="浅析人脸检测之Haar分类器方法 - ello - 博客园" target="_blank" rel="external">浅析人脸检测之Haar分类器方法 - ello - 博客园</a></p>
+    <content type="html"><![CDATA[<h1 id="Mysql-执行优化"><a href="#Mysql-执行优化" class="headerlink" title="Mysql 执行优化"></a>Mysql 执行优化</h1><h2 id="认识数据索引"><a href="#认识数据索引" class="headerlink" title="认识数据索引"></a>认识数据索引</h2><p>1). 为什么使用数据索引能提高效率<br>&emsp;•    数据索引的存储是有序的<br>&emsp;•    在有序的情况下，通过索引查询一个数据是无需遍历索引记录的<br>&emsp;•    极端情况下，数据索引的查询效率为二分法查询效率，趋近于 log2(N)<br>2). 如何理解数据索引的结构<br>&emsp;•    数据索引通常默认采用 btree 索引，（内存表也使用了 hash 索引）。<br>&emsp;•    单一有序排序序列是查找效率最高的（二分查找，或者说折半查找），使用树形索引的目的是为了达到快速的更新和增删操作。<br>&emsp;•    在极端情况下（比如数据查询需求量非常大，而数据更新需求极少，实时性要求不高，数据规模有限），直接使用单一排序序列，折半查找速度最快。<br>&emsp;&emsp;&emsp;    实战范例 ： ip 地址反查<br>&emsp;&emsp;&emsp;资源： Ip 地址对应表，源数据格式为  startip, endip, area 源数据条数为 10 万条左右，呈很大的分散性目标： 需要通过任意 ip 查询该 ip 所属地区<br>性能要求达到每秒 1000 次以上的查询效率<br>&emsp;&emsp;&emsp;挑战： 如使用 between … and 数据库操作，无法有效使用索引。<br>如果每次查询请求需要遍历 10 万条记录，根本不行。<br>&emsp;&emsp;&emsp;方法： 一次性排序（只在数据准备中进行，数据可存储在内存序列）折半查找（每次请求以折半查找方式进行）<br>&emsp;•        在进行索引分析和 SQL 优化时，可以将数据索引字段想象为单一有序序列，并以此作为分析的基础。<br>&emsp;&emsp;&emsp;    实战范例：复合索引查询优化实战，同城异性列表<br>资源： 用户表 user，字段 sex 性别；area 地区；lastlogin 最后登录时间；其他略目标： 查找同一地区的异性，按照最后登录时间逆序    高访问量社区的高频查询，如何优化。<br>&emsp;&emsp;&emsp;&emsp;查询 SQL: select * from user where area=’$area’ and sex=’$sex’ order by lastlogin desc limit 0,30;<br>&emsp;&emsp;&emsp;&emsp;挑战： 建立复合索引并不难， area+sex+lastlogin 三个字段的复合索引,如何理解？<br>&emsp;&emsp;&emsp;&emsp;首先，忘掉 btree，将索引字段理解为一个排序序列。<br>&emsp;&emsp;&emsp;&emsp;如果只使用 area 会怎样？搜索会把符合 area 的结果全部找出来，然后在这里面遍历，选择命中 sex 的并排序。 遍历所有 area=’$area’数据！<br>如果使用了 area+sex，略好，仍然要遍历所有 area=’$area’     and sex=’$sex’数据，然后在这个基础上排序！！<br>&emsp;&emsp;&emsp;&emsp;Area+sex+lastlogin 复合索引时（切记 lastlogin 在最后），该索引基于 area+sex+lastlogin 三个字段合并的结果排序，该列表可以想象如下。<br>&emsp;&emsp;&emsp;&emsp;广州女$时间 1 广州女$时间 2 广州女$时间 3<br>&emsp;&emsp;&emsp;&emsp;…<br>&emsp;&emsp;&emsp;&emsp;广州男<br>&emsp;&emsp;&emsp;&emsp;….<br>&emsp;&emsp;&emsp;&emsp;深圳女<br>&emsp;&emsp;&emsp;&emsp;….<br>&emsp;&emsp;&emsp;&emsp;数据库很容易命中到     area+sex 的边界，并且基于下边界向上追溯 30 条记录，搞定！在索引中迅速命中所有结果，无需二次遍历！ </p>
+<p>3). 如何理解影响结果集<br>&emsp;•    影响结果集是数据查询优化的一个重要中间数据<br>&emsp;&emsp;&emsp;    查询条件与索引的关系决定影响结果集如上例所示，即便查询用到了索引，但是如果查询和排序目标不能直接在索引中命中，其可能带来较多的影响结果。而这会直接影响到查询效率<br>&emsp;&emsp;&emsp;    微秒级优化<br>&emsp;&emsp;&emsp;&emsp;&emsp;•    优化查询不能只看慢查询日志，常规来说，0.01 秒以上的查询，都是不够优化的。<br>&emsp;&emsp;&emsp;&emsp;&emsp;•    实战范例<br>&emsp;&emsp;&emsp;&emsp;&emsp;和上案例类似，某游戏社区要显示用户动态，select * from userfeed where uid=$uid order by lastlogin desc limit 0,30;   初期默认以 uid 为索引字段，查询为命中所有 uid=$uid 的结果按照 lastlogin 排序。 当用户行为非常频繁时，该 SQL 索引命中影响结果集有数百乃至数千条记录。查询效率超过 0.01 秒，并发较大时数据库压力较大。<br>&emsp;&emsp;&emsp;&emsp;&emsp;解决方案：将索引改为 uid+lastlogin 复合索引，索引直接命中影响结果集 30 条，查询效率提高了 10 倍，平均在 0.001 秒，数据库压力骤降。<br>&emsp;&emsp;&emsp;    影响结果集的常见误区<br>&emsp;&emsp;&emsp;&emsp;&emsp;•    影响结果集并不是说数据查询出来的结果数或操作影响的结果数，而是查询条件的索引所命中的结果数。<br>&emsp;&emsp;&emsp;&emsp;&emsp;•    实战范例<br>&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;■        某游戏数据库使用了 innodb，innodb 是行级锁，理论上很少存在锁表情况。出现了一个 SQL 语句(delete from tabname where xid=…)，这个 SQL 非常用 SQL，仅在特定情况下出现，每天出现频繁度不高（一天仅 10 次左右），数据表容量百万级，但是这个 xid 未建立索引，于是悲惨的事情发生了，当执行这条 delete 的时候，真正删除的记录非常少，也许一到两条，也许一条都没有；但是！由于这个 xid 未建立索引，<br>delete 操作时遍历全表记录，全表被 delete 操作锁定，select 操作全部被 locked，由于百万条记录遍历时间较长，期间大量 select 被阻塞，数据库连接过多崩溃。<br>&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;这种非高发请求，操作目标很少的 SQL，因未使用索引，连带导致整个数据库的查询阻塞，需要极大提高警觉。<br>&emsp;&emsp;&emsp;    总结：<br>&emsp;&emsp;&emsp;&emsp;&emsp;•    影响结果集是搜索条件索引命中的结果集，而非输出和操作的结果集。<br>&emsp;&emsp;&emsp;&emsp;&emsp;•    影响结果集越趋近于实际输出或操作的目标结果集，索引效率越高。<br>&emsp;&emsp;&emsp;&emsp;&emsp;•    请注意，我这里永远不会讲关于外键和 join 的优化，因为在我们的体系里，这是根本不允许的！ 架构优化部分会解释为什么。  </p>
+<h2 id="理解执行状态"><a href="#理解执行状态" class="headerlink" title="理解执行状态"></a>理解执行状态</h2><p><strong>常见分析手段</strong> </p>
+<p>&emsp;•    慢查询日志，关注重点如下<br>&emsp;&emsp;&emsp;    是否锁定，及锁定时间<br>&emsp;&emsp;&emsp;&emsp;&emsp;•    如存在锁定，则该慢查询通常是因锁定因素导致，本身无需优化，需解决锁定问题。<br>&emsp;&emsp;&emsp;    影响结果集<br>&emsp;&emsp;&emsp;&emsp;&emsp;•    如影响结果集较大，显然是索引项命中存在问题，需要认真对待。  </p>
+<p>&emsp;•    Explain 操作<br>&emsp;&emsp;&emsp;    索引项使用<br>&emsp;&emsp;&emsp;&emsp;&emsp;•    不建议用 using index 做强制索引，如未如预期使用索引，建议重新斟酌表结构和索引设置。<br>&emsp;&emsp;&emsp;    影响结果集<br>&emsp;&emsp;&emsp;&emsp;&emsp;•    这里显示的数字不一定准确，结合之前提到对数据索引的理解来看，还记得嘛？就把索引当作有序序列来理解，反思 SQL。</p>
+<p>&emsp;•    Set profiling , show profiles for query 操作<br>&emsp;&emsp;&emsp;执行开销<br>&emsp;&emsp;&emsp;&emsp;&emsp;•    注意，有问题的 SQL 如果重复执行，可能在缓存里，这时要注意避免缓存影响。通过这里可以看到。<br>&emsp;&emsp;&emsp;&emsp;&emsp;•    执行时间超过 0.005 秒的频繁操作 SQL 建议都分析一下。<br>&emsp;&emsp;&emsp;&emsp;&emsp;•    深入理解数据库执行的过程和开销的分布<br>&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;■        Show processlist<br>&emsp;•状态清单<br>&emsp;&emsp;&emsp;Sleep 状态， 通常代表资源未释放，如果是通过连接池，sleep 状态应该恒定在一定数量范围内<br>&emsp;&emsp;&emsp;&emsp;&emsp;•    实战范例： 因前端数据输出时（特别是输出到用户终端）未及时关闭数据库连接，导致因网络连接速度产生大量 sleep 连接，在网速<br>出现异常时，数据库 too many connections 挂死。<br>&emsp;&emsp;&emsp;&emsp;&emsp;•    简单解读，数据查询和执行通常只需要不到 0.01 秒，而网络输出通常需要 1 秒左右甚至更长，原本数据连接在 0.01 秒即可释放，但是因为前端程序未执行 close 操作，直接输出结果，那么在结果未展现在用户桌面前，该数据库连接一直维持在 sleep 状态！<br>&emsp;&emsp;&emsp;    Waiting for net, reading from net, writing to net<br>&emsp;&emsp;&emsp;&emsp;&emsp;•    偶尔出现无妨<br>&emsp;&emsp;&emsp;&emsp;&emsp;•    如大量出现，迅速检查数据库到前端的网络连接状态和流量<br>&emsp;&emsp;&emsp;&emsp;&emsp;•    案例: 因外挂程序，内网数据库大量读取，内网使用的百兆交换迅速爆满，导致大量连接阻塞在 waiting for net，数据库连接过多崩溃<br>&emsp;&emsp;&emsp;    Locked 状态<br>&emsp;&emsp;&emsp;&emsp;&emsp;•    有更新操作锁定<br>&emsp;&emsp;&emsp;&emsp;&emsp;•    通常使用 innodb 可以很好的减少 locked 状态的产生，但是切记，更新操作要正确使用索引，即便是低频次更新操作也不能疏忽。如上影响结果集范例所示。<br>&emsp;&emsp;&emsp;&emsp;&emsp;•    在 myisam 的时代，locked 是很多高并发应用的噩梦。所以 mysql 官方也开始倾向于推荐 innodb。<br>&emsp;&emsp;&emsp;    Copy to tmp table<br>&emsp;&emsp;&emsp;&emsp;&emsp;•    索引及现有结构无法涵盖查询条件，才会建立一个临时表来满足查询要求，产生巨大的恐怖的 i/o 压力。<br>&emsp;&emsp;&emsp;&emsp;&emsp;•    很可怕的搜索语句会导致这样的情况，如果是数据分析，或者半夜的周期数据清理任务，偶尔出现，可以允许。频繁出现务必优化之。<br>&emsp;&emsp;&emsp;&emsp;&emsp;•    Copy to tmp table 通常与连表查询有关，建议逐渐习惯不使用连表查询。<br>&emsp;&emsp;&emsp;&emsp;&emsp;•    实战范例：<br>&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;■ 某社区数据库阻塞，求救，经查，其服务器存在多个数据库应用和网站，其中一个不常用的小网站数据库产生了一个恐怖的copy to tmp table 操作，导致整个硬盘 i/o 和 cpu 压力超载。Kill 掉该操作一切恢复。<br>&emsp;&emsp;&emsp;    Sending data<br>&emsp;&emsp;&emsp;&emsp;&emsp;•    Sending data 并不是发送数据，别被这个名字所欺骗，这是从物理磁盘获取数据的进程，如果你的影响结果集较多，那么就需要从不同的磁盘碎片去抽取数据，<br>&emsp;&emsp;&emsp;&emsp;&emsp;•    偶尔出现该状态连接无碍。<br>&emsp;&emsp;&emsp;&emsp;&emsp;•    回到上面影响结果集的问题，一般而言，如果 sending data 连接过多，通常是某查询的影响结果集过大，也就是查询的索引项不够优化。<br>&emsp;&emsp;&emsp;&emsp;&emsp;•    如果出现大量相似的 SQL 语句出现在 show proesslist 列表中，并且都处于 sending data 状态，优化查询索引，记住用影响结果集的思路去思考。<br>&emsp;&emsp;&emsp;    Freeing items<br>&emsp;&emsp;&emsp;&emsp;&emsp;•    理论上这玩意不会出现很多。偶尔出现无碍<br>&emsp;&emsp;&emsp;&emsp;&emsp;•    如果大量出现，内存，硬盘可能已经出现问题。比如硬盘满或损坏。<br>&emsp;&emsp;&emsp;    Sorting for …<br>&emsp;&emsp;&emsp;&emsp;&emsp;• 和 Sending     data 类似，结果集过大，排序条件没有索引化，需要在内存里排序，甚至需要创建临时结构排序。<br>&emsp;&emsp;&emsp;    其他<br>&emsp;&emsp;&emsp;&emsp;&emsp;• 还有很多状态，遇到了，去查查资料。基本上我们遇到其他状态的阻塞较少，所以不关心。</p>
+<p>##分析流程<br>&emsp;•    基本流程<br>&emsp;&emsp;&emsp;    详细了解问题状况<br>&emsp;&emsp;&emsp;&emsp;&emsp;•    Too many connections 是常见表象，有很多种原因。<br>&emsp;&emsp;&emsp;&emsp;&emsp;•    索引损坏的情况在 innodb 情况下很少出现。<br>&emsp;&emsp;&emsp;&emsp;&emsp;•    如出现其他情况应追溯日志和错误信息。<br>&emsp;&emsp;&emsp;    了解基本负载状况和运营状况<br>&emsp;&emsp;&emsp;&emsp;&emsp;•    基本运营状况<br>&emsp;•        当前每秒读请求<br>&emsp;•        当前每秒写请求<br>&emsp;•        当前在线用户<br>&emsp;•        当前数据容量 </p>
+<p><strong>基本负载情况 </strong><br>&emsp;•    学会使用这些指令<br>&emsp;&emsp;&emsp;    Top<br>&emsp;&emsp;&emsp;    Vmstat<br>&emsp;&emsp;&emsp;    uptime<br>&emsp;&emsp;&emsp;    iostat<br>&emsp;&emsp;&emsp;    df<br>&emsp;•    Cpu 负载构成<br>&emsp;&emsp;&emsp;    特别关注 i/o 压力( wa%)<br>&emsp;&emsp;&emsp;    多核负载分配<br>&emsp;•    内存占用<br>&emsp;&emsp;&emsp;    Swap 分区是否被侵占<br>&emsp;&emsp;&emsp;    如 Swap 分区被侵占，物理内存是否较多空闲<br>&emsp;•    磁盘状态<br>&emsp;&emsp;&emsp;    硬盘满和 inode 节点满的情况要迅速定位和迅速处理<br>&emsp;&emsp;&emsp;    了解具体连接状况  </p>
+<p><strong>当前连接数</strong><br>&emsp;•    Netstat –an|grep 3306|wc –l<br>&emsp;•    Show processlist  </p>
+<p><strong>当前连接分布 show processlist</strong><br>&emsp;•    前端应用请求数据库不要使用 root 帐号！<br>&emsp;&emsp;&emsp;    Root 帐号比其他普通帐号多一个连接数许可。<br>&emsp;&emsp;&emsp;    前端使用普通帐号，在 too many connections 的时候 root 帐号仍可以登录数据库查询 show processlist!<br>&emsp;&emsp;&emsp;    记住，前端应用程序不要设置一个不叫 root 的 root 帐号来糊弄！非 root 账户是骨子里的，而不是名义上的。<br>&emsp;•    状态分布<br>&emsp;&emsp;&emsp;    不同状态代表不同的问题，有不同的优化目标。<br>&emsp;&emsp;&emsp;    参见如上范例。<br>&emsp;•    雷同 SQL 的分布<br>&emsp;&emsp;&emsp;    是否较多雷同 SQL 出现在同一状态  </p>
+<p><strong>当前是否有较多慢查询日志</strong><br>&emsp;•    是否锁定<br>&emsp;•    影响结果集<br>&emsp;&emsp;&emsp;    频繁度分析  </p>
+<p><strong>写频繁度</strong><br>&emsp;•    如果 i/o 压力高，优先分析写入频繁度<br>&emsp;•    Mysqlbinlog 输出最新 binlog 文件，编写脚本拆分<br>&emsp;•    最多写入的数据表是哪个<br>&emsp;•    最多写入的数据 SQL 是什么<br>&emsp;•    是否存在基于同一主键的数据内容高频重复写入？<br>&emsp;•    涉及架构优化部分，参见架构优化-缓存异步更新<br><strong>读取频繁度</strong><br>&emsp;•    如果 cpu 资源较高，而 i/o 压力不高，优先分析读取频繁度<br>&emsp;•    程序中在封装的 db 类增加抽样日志即可，抽样比例酌情考虑，以不显著影响系统负载压力为底线。<br>&emsp;•    最多读取的数据表是哪个<br>&emsp;•    最多读取的数据 SQL 是什么<br>&emsp;&emsp;&emsp;    该 SQL 进行 explain 和 set profiling 判定<br>&emsp;&emsp;&emsp;    注意判定时需要避免 query cache 影响<br>&emsp;&emsp;&emsp;    比如，在这个 SQL 末尾增加一个条件子句 and 1=1 就可以<br>避免从 query cache 中获取数据，而得到真实的执行状态分析。<br>&emsp;• 是否存在同一个查询短期内频繁出现的情况<br>&emsp;&emsp;&emsp;    涉及前端缓存优化<br>&emsp;&emsp;&emsp;    抓大放小，解决显著问题 </p>
+<p><strong>不苛求解决所有优化问题，但是应以保证线上服务稳定可靠为目标。</strong></p>
+<p><strong>解决与评估要同时进行，新的策略或解决方案务必经过评估后上线。</strong></p>
+<p>##总结<br>&emsp;•    要学会怎样分析问题，而不是单纯拍脑袋优化<br>&emsp;•    慢查询只是最基础的东西，要学会优化 0.01 秒的查询请求。<br>&emsp;•    当发生连接阻塞时，不同状态的阻塞有不同的原因，要找到原因，如果不对症下药，就会南辕北辙<br>&emsp;&emsp;&emsp;    范例：如果本身系统内存已经超载，已经使用到了 swap，而还在考虑加大缓存来优化查询，那就是自寻死路了。<br>&emsp;•    监测与跟踪要经常做，而不是出问题才做<br>&emsp;&emsp;&emsp;    读取频繁度抽样监测<br>&emsp;&emsp;&emsp;&emsp;&emsp;•    全监测不要搞，i/o 吓死人。<br>&emsp;&emsp;&emsp;&emsp;&emsp;•    按照一个抽样比例抽样即可。<br>&emsp;&emsp;&emsp;&emsp;&emsp;•    针对抽样中发现的问题，可以按照特定 SQL 在特定时间内监测一段全查询记录，但仍要考虑 i/o 影响。<br>&emsp;&emsp;&emsp;    写入频繁度监测<br>&emsp;&emsp;&emsp;&emsp;&emsp;•    基于 binlog 解开即可，可定时或不定时分析。<br>&emsp;&emsp;&emsp;    微慢查询抽样监测<br>&emsp;&emsp;&emsp;&emsp;&emsp;•    高并发情况下，查询请求时间超过 0.01 秒甚至 0.005 秒的，建议酌情抽样记录。<br>&emsp;&emsp;&emsp;    连接数预警监测<br>&emsp;&emsp;&emsp;&emsp;&emsp;•    连接数超过特定阈值的情况下，虽然数据库没有崩溃，建议记录相关连接状态。<br>&emsp;•    学会通过数据和监控发现问题，分析问题，而后解决问题顺理成章。特别是要学会在日常监控中发现隐患，而不是问题爆发了才去处理和解决。  </p>
 ]]></content>
     
     <summary type="html">
     
-      &lt;p&gt;&lt;a href=&quot;http://www.cnblogs.com/steven-yang/p/6348112.html&quot; title=&quot;机器学习中的基本数学知识 - SNYang - 博客园&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;机器学习中的基本数学
+      &lt;h1 id=&quot;Mysql-执行优化&quot;&gt;&lt;a href=&quot;#Mysql-执行优化&quot; class=&quot;headerlink&quot; title=&quot;Mysql 执行优化&quot;&gt;&lt;/a&gt;Mysql 执行优化&lt;/h1&gt;&lt;h2 id=&quot;认识数据索引&quot;&gt;&lt;a href=&quot;#认识数据索引&quot; class=&quot;
+    
+    </summary>
+    
+      <category term="mysql" scheme="http://zhaoxj0217.github.io/categories/mysql/"/>
+    
+    
+      <category term="mysql" scheme="http://zhaoxj0217.github.io/tags/mysql/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Mysql 架构优化—mysql</title>
+    <link href="http://zhaoxj0217.github.io/2017/11/05/mysql_optimize_framework/"/>
+    <id>http://zhaoxj0217.github.io/2017/11/05/mysql_optimize_framework/</id>
+    <published>2017-11-05T06:44:32.361Z</published>
+    <updated>2017-11-05T07:38:26.551Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="Mysql-架构优化"><a href="#Mysql-架构优化" class="headerlink" title="Mysql 架构优化"></a>Mysql 架构优化</h1><h2 id="架构优化目标"><a href="#架构优化目标" class="headerlink" title="架构优化目标"></a>架构优化目标</h2><p>1). 防止单点隐患<br>&emsp;•    所谓单点隐患，就是某台设备出现故障，会导致整体系统的不可用，这个设备就是单点隐患。<br>&emsp;•    理解连带效应，所谓连带效应，就是一种问题会引发另一种故障，举例而言，<br>memcache+mysql 是一种常见缓存组合，在前端压力很大时，如果 memcache 崩溃，<br>理论上数据会通过 mysql 读取，不存在系统不可用情况，但是 mysql 无法对抗如此大的压力冲击，会因此连带崩溃。因 A 系统问题导致 B 系统崩溃的连带问题，在运维过程中会频繁出现。<br>&emsp;&emsp;&emsp;    实战范例： 在 mysql 连接不及时释放的应用环境里，当网络环境异常（同机房友邻服务器遭受拒绝服务攻击，出口阻塞），网络延迟加剧，空连接数急剧增加，导致数据库连接过多崩溃。<br>&emsp;&emsp;&emsp;    实战范例 2：前端代码 通常我们封装 mysql_connect 和 memcache_connect，二者的顺序不同，会产生不同的连带效应。如果 mysql_connect 在前，那么一旦 memcache 连接阻塞，会连带 mysql 空连接过多崩溃。<br>&emsp;&emsp;&emsp;    连带效应是常见的系统崩溃，日常分析崩溃原因的时候需要认真考虑连带效应的影响，头疼医头，脚疼医脚是不行的。  </p>
+<p>2). 方便系统扩容<br>&emsp;•    数据容量增加后，要考虑能够将数据分布到不同的服务器上。<br>&emsp;•    请求压力增加时，要考虑将请求压力分布到不同服务器上。<br>&emsp;•    扩容设计时需要考虑防止单点隐患。  </p>
+<p>3). 安全可控，成本可控<br>&emsp;•    数据安全，业务安全<br>&emsp;•    人力资源成本&gt;带宽流量成本&gt;硬件成本<br>&emsp;&emsp;&emsp;    成本与流量的关系曲线应低于线性增长（流量为横轴，成本为纵轴）。<br>&emsp;&emsp;&emsp;    规模优势<br>&emsp;•    本教程仅就与数据库有关部分讨论，与数据库无关部门请自行参阅其他学习资料。  </p>
+<p>##分布式方案<br>1). 分库&amp;拆表方案<br>&emsp;•    基本认识<br>&emsp;&emsp;&emsp;    用分库&amp;拆表是解决数据库容量问题的唯一途径。<br>&emsp;&emsp;&emsp;    分库&amp;拆表也是解决性能压力的最优选择。<br>&emsp;&emsp;&emsp;    分库 – 不同的数据表放到不同的数据库服务器中（也可能是虚拟服务器）<br>&emsp;&emsp;&emsp;    拆表 – 一张数据表拆成多张数据表，可能位于同一台服务器，也可能位于多台服务器（含虚拟服务器）。  </p>
+<p>&emsp;•    去关联化原则<br>&emsp;&emsp;&emsp;    摘除数据表之间的关联，是分库的基础工作。<br>&emsp;&emsp;&emsp;    摘除关联的目的是，当数据表分布到不同服务器时，查询请求容易分发和处理。<br>&emsp;&emsp;&emsp;    学会理解反范式数据结构设计，所谓反范式，第一要点是不用外键，不允许<br>Join 操作，不允许任何需要跨越两个表的查询请求。第二要点是适度冗余减少查询请求，比如说，信息表，fromuid, touid, message 字段外，还需要一个 fromuname 字段记录用户名，这样查询者通过 touid 查询后，能够立即得到发信人的用户名，而无需进行另一个数据表的查询。<br>&emsp;&emsp;&emsp;    去关联化处理会带来额外的考虑，比如说，某一个数据表内容的修改，对另一个数据表的影响。这一点需要在程序或其他途径去考虑。  </p>
+<p>&emsp;•    分库方案<br>&emsp;&emsp;&emsp;    安全性拆分<br>&emsp;&emsp;&emsp;&emsp;&emsp;◆    将高安全性数据与低安全性数据分库，这样的好处第一是便于维护，第二是高安全性数据的数据库参数配置可以以安全优先，而低安全性数据的参数配置以性能优先。参见运维优化相关部分。<br>&emsp;&emsp;&emsp;    顺序写数据与随机读写数据分库<br>&emsp;&emsp;&emsp;&emsp;&emsp;◆        顺序数据与随机数据区分存储地址，保证物理 i/o 优化。这个实话说，我只听说了概念，还没学会怎么实践。<br>&emsp;&emsp;&emsp;    基于业务逻辑拆分<br>&emsp;&emsp;&emsp;&emsp;&emsp;◆    根据数据表的内容构成，业务逻辑拆分，便于日常维护和前端调用。<br>&emsp;&emsp;&emsp;&emsp;&emsp;◆    基于业务逻辑拆分，可以减少前端应用请求发送到不同数据库服务器的频次，从而减少链接开销。<br>&emsp;&emsp;&emsp;&emsp;&emsp;◆    基于业务逻辑拆分，可保留部分数据关联，前端 web 工程师可在限度范围内执行关联查询。<br>&emsp;&emsp;&emsp;    基于负载压力拆分<br>&emsp;&emsp;&emsp;&emsp;&emsp;◆    基于负载压力对数据结构拆分，便于直接将负载分担给不同的服务器。<br>&emsp;&emsp;&emsp;&emsp;&emsp;◆    基于负载压力拆分，可能拆分后的数据库包含不同业务类型的数据表，日常维护会有一定的烦恼。  </p>
+<p>&emsp;•    分表方案<br>&emsp;&emsp;&emsp;    数据量过大或者访问压力过大的数据表需要切分<br>&emsp;&emsp;&emsp;    忙闲分表<br>&emsp;&emsp;&emsp;&emsp;&emsp;◆    单数据表字段过多，可将频繁更新的整数数据与非频繁更新的字符串数据切分<br>&emsp;&emsp;&emsp;&emsp;&emsp;◆    范例 user 表 ，个人简介，地址，QQ 号，联系方式，头像 这些字段为字符串类型，更新请求少； 最后登录时间，在线时常，访问次数，信件数这些字段为整数型字段，更新频繁，可以将后面这些更新频繁的字段独立拆出一张数据表，表内容变少，索引结构变少，读写请求变快。<br>&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;■    横向切表<br>&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;● 等分切表，如哈希切表或其他基于对某数字取余的切表。等分切表的优点是负载很方便的分布到不同服务器；缺点是当容量继续增加时无法方便的扩容，需要重新进行数据的切分或转表。而且一些关键主键不易处理。<br>&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;●    递增切表，比如每 1kw 用户开一个新表，优点是可以适应数据的自增趋势；缺点是往往新数据负载高，压力分配不平均。<br>&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;●    日期切表，适用于日志记录式数据，优缺点等同于递增切表。<br>&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;●    个人倾向于递增切表，具体根据应用场景决定。<br>&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;■        热点数据分表<br>&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;●    将数据量较大的数据表中将读写频繁的数据抽取出来，形成热点数据表。通常一个庞大数据表经常被读写的内容往往具有一定的集中性，如果这些集中数据单独处理，就会极大减少整体系统的负载。<br>&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;●    热点数据表与旧有数据关系<br>&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;<em>    可以是一张冗余表，即该表数据丢失不会妨碍使用，因源数据仍存在于旧有结构中。优点是安全性高，维护方便，缺点是写压力不能分担，仍需要同步写回原系统。<br>&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;</em>    可以是非冗余表，即热点数据的内容原有结构不再保存，优点是读写效率全部优化；缺点是当热点数据发生变化时，维护量较大。<br>&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;<em>    具体方案选择需要根据读写比例决定，在读频率远高于写频率情况下，优先考虑冗余表方案。<br>&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;●        热点数据表可以用单独的优化的硬件存储，比如昂贵的闪存卡或大内存系统。<br>&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;●        热点数据表的重要指标<br>&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;</em>        热点数据的定义需要根据业务模式自行制定策略，常见策略为，按照最新的操作时间；按照内容丰富度等等。<br>&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;<em>        数据规模，比如从 1000 万条数据，抽取出 100 万条热点数据。<br>&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;</em>        热点命中率，比如查询 10 次，多少次命中在热点数据内。<br>&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;<em>        理论上，数据规模越小，热点命中率越高，说明效果越好。需要根据业务自行评估。<br>&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;●    热点数据表的动态维护<br>&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;</em>    加载热点数据方案选择<br>&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;<em>    定时从旧有数据结构中按照新的策略获取<br>&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;</em>    在从旧有数据结构读取时动态加载到热点数据<br>&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;●    剔除热点数据方案选择<br>&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;<em>    基于特定策略，定时将热点数据中访问频次较少的数据剔除<br>&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;</em>    如热点数据是冗余表，则直接删除即可，如不是冗余表，需要回写给旧有数据结构。<br>&emsp;&emsp;通常，热点数据往往是基于缓存或者 key-value 方案冗余存储，所以这里提到的热点数据表，其实更多是理解思路，用到的场合可能并不多….  </p>
+<p>&emsp;•    表结构设计<br>&emsp;&emsp;&emsp;查询冗余表设计<br>&emsp;&emsp;&emsp;&emsp;&emsp;◆        涉及分表操作后，一些常见的索引查询可能需要跨表，带来不必要的麻烦。 确认查询请求远大于写入请求时，应设置便于查询项的冗余表。<br>&emsp;&emsp;&emsp;&emsp;&emsp;◆        实战范例，<br>&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;■        用户分表，将用户库分成若干数据表<br>&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;■        基于用户名的查询和基于 uid 的查询都是高并发请求。<br>&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;■            用户分表基于 uid 分成数据表，同时基于用户名做对应冗余表。<br>&emsp;&emsp;&emsp;&emsp;&emsp;◆冗余表要点<br>&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;■        数据一致性，简单说，同增，同删，同更新。<br>&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;■        可以做全冗余，或者只做主键关联的冗余，比如通过用户名查询 uid，再基于 uid 查询源表。<br>&emsp;&emsp;&emsp;    中间数据表<br>&emsp;&emsp;&emsp;&emsp;&emsp;◆        为了减少会涉及大规模影响结果集的表数据操作，比如 count，sum 操作。应将一些统计类数据通过中间数据表保存。<br>&emsp;&emsp;&emsp;&emsp;&emsp;◆        中间数据表应能通过源数据表恢复。<br>&emsp;&emsp;&emsp;&emsp;&emsp;◆        实战范例：<br>&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;■        论坛板块的发帖量，回帖量，每日新增数据等<br>&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;■        网站每日新增用户数等。<br>&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;■        后台可以通过源数据表更新该数字。<br>&emsp;&emsp;&emsp;    历史数据表<br>&emsp;&emsp;&emsp;&emsp;&emsp;◆        历史数据表对应于热点数据表，将需求较少又不能丢弃的数据存入，仅在少数情况下被访问。  </p>
+<p>2). 主从架构<br>&emsp;•    基本认识<br>&emsp;&emsp;&emsp;    读写分离对负载的减轻远远不如分库分表来的直接。<br>&emsp;&emsp;&emsp;    写压力会传递给从表，只读从库一样有写压力，一样会产生读写锁！<br>&emsp;&emsp;&emsp;    一主多从结构下，主库是单点隐患，很难解决（如主库当机，从库可以响应读写，但是无法自动担当主库的分发功能）<br>&emsp;&emsp;&emsp;    主从延迟也是重大问题。一旦有较大写入问题，如表结构更新，主从会产生巨大延迟。  </p>
+<p>&emsp;•    应用场景<br>&emsp;&emsp;&emsp;    在线热备<br>&emsp;&emsp;&emsp;    异地分布<br>&emsp;&emsp;&emsp;&emsp;&emsp;◆    写分布，读统一。<br>&emsp;&emsp;&emsp;&emsp;&emsp;◆    仍然困难重重，受限于网络环境问题巨多！<br>&emsp;&emsp;&emsp;    自动障碍转移<br>&emsp;&emsp;&emsp;&emsp;&emsp;◆    主崩溃，从自动接管<br>&emsp;&emsp;&emsp;    个人建议，负载均衡主要使用分库方案，主从主要用于热备和障碍转移。 </p>
+<p>&emsp;•    潜在优化点<br>&emsp;&emsp;&emsp;    为了减少写压力，有些人建议主不建索引提升 i/o 性能，从建立索引满足查询要求。个人认为这样维护较为麻烦。而且从本身会继承主的 i/o 压力，因此优化价值有限。该思路特此分享，不做推荐。  </p>
+<p>3). 故障转移处理<br>&emsp;•        要点<br>&emsp;&emsp;&emsp;    程序与数据库的连接，基于虚地址而非真实 ip，由负载均衡系统监控。<br>&emsp;&emsp;&emsp;    保持主从结构的简单化，否则很难做到故障点摘除。  </p>
+<p>&emsp;•        思考方式<br>&emsp;&emsp;&emsp;    遍历对服务器集群的任何一台服务器，前端 web，中间件，监控，缓存，db 等等，假设该服务器出现故障，系统是否会出现异常？用户访问是否会出现异常。<br>&emsp;&emsp;&emsp;    目标：任意一台服务器崩溃，负载和数据操作均会很短时间内自动转移到其他服务器，不会影响业务的正常进行。不会造成恶性的数据丢失。（哪些是可以丢失的，哪些是不能丢失的）  </p>
+<h2 id="缓存方案"><a href="#缓存方案" class="headerlink" title="缓存方案"></a>缓存方案</h2><p>1). 缓存结合数据库的读取<br>&emsp;•        Memcached/redis 是最常用的缓存系统<br>&emsp;•        Mysql 最新版本已经开始支持 memcache 插件，但据牛人分析，尚不成熟，暂不推荐。<br>&emsp;•        数据读取<br>&emsp;&emsp;&emsp;    并不是所有数据都适合被缓存，也并不是进入了缓存就意味着效率提升。<br>&emsp;&emsp;&emsp;    命中率是第一要评估的数据。<br>&emsp;&emsp;&emsp;    如何评估进入缓存的数据规模，以及命中率优化，是非常需要细心分析的。<br>&emsp;•    实景分析： 前端请求先连接缓存，缓存未命中连接数据库，进行查询，未命中状态比单纯连接数据库查询多了一次连接和查询的操作；如果缓存命中率很低，则这个额外的操作非但不能提高查询效率，反而为系统带来了额外的负载和复杂性，得不偿失。<br>&emsp;&emsp;&emsp;    相关评估类似于热点数据表的介绍。<br>&emsp;&emsp;&emsp;    善于利用内存，请注意数据存储的格式及压缩算法。<br>&emsp;•    Key-value 方案繁多，本培训文档暂不展开。  </p>
+<p>2). 缓存结合数据库的写入<br>&emsp;•    利用缓存不但可以减少数据读取请求，还可以减少数据库写入 i/o 压力<br>&emsp;•    缓存实时更新，数据库异步更新<br>&emsp;&emsp;&emsp;    缓存实时更新数据，并将更新记录写入队列<br>&emsp;&emsp;&emsp;    可以使用类似 mq 的队列产品，自行建立队列请注意使用 increment 来维持队列序号。<br>&emsp;&emsp;&emsp;    不建议使用 get 后处理数据再 set 的方式维护队列<br>&emsp;•    测试范例：<br>&emsp;•    范例 1</p>
+<pre><code>$var=Memcache_get($memcon,”var”);  
+ $var++;  
+memcache_set($memcon,”var”,$var);  
+</code></pre><p>&emsp;这样一个脚本，使用 apache ab 去跑，100 个并发，跑 10000 次，然后输出缓存存取的数据，很遗憾，并不是 1000，而是 5000 多，6000 多这样的数字，中间的数字全在 get &amp; set 的过程中丢掉了。<br>原因，读写间隔中其他并发写入，导致数据丢失。<br>&emsp;•    范例 2<br>&emsp;用 memcache_increment 来做这个操作，同样跑测试会得到完整的 10000，一条数据不会丢。<br>&emsp;•    结论： 用 increment 存储队列编号，用标记+编号作为 key 存储队列内容。<br>&emsp;&emsp;&emsp;    后台基于缓存队列读取更新数据并更新数据库<br>&emsp;•    基于队列读取后可以合并更新<br>&emsp;•    更新合并率是重要指标<br>&emsp;•    实战范例：<br>某论坛热门贴，前端不断有 views=views+1 数据更新请求。<br>缓存实时更新该状态后台任务对数据库做异步更新时，假设执行周期是 5 分钟，那么五分钟可能<br>会接收到这样的请求多达数十次乃至数百次，合并更新后只执行一次 update 即可。<br>类似操作还包括游戏打怪，生命和经验的变化；个人主页访问次数的变化等。<br>&emsp;&emsp;&emsp;    异步更新风险<br>&emsp;&emsp;&emsp;&emsp;&emsp;◆    前后端同时写，可能导致覆盖风险。<br>&emsp;&emsp;&emsp;&emsp;&emsp;◆    使用后端异步更新，则前端应用程序就不要写数据库，否则可能造成写入冲突。一种兼容的解决方案是，前端和后端不要写相同的字段。<br>&emsp;&emsp;&emsp;&emsp;&emsp;◆    实战范例：<br>&emsp;&emsp;&emsp;&emsp;&emsp;用户在线上时，后台异步更新用户状态。管理员后台屏蔽用户是直接更新数据库。<br>结果管理员屏蔽某用户操作完成后，因该用户在线有操作，后台异步更新程序再次基于缓存更新用户状态，用户状态被复活，屏蔽失效。<br>&emsp;&emsp;&emsp;&emsp;&emsp;◆        缓存数据丢失或服务崩溃可能导致数据丢失风险。<br>&emsp;&emsp;&emsp;&emsp;&emsp;◆        如缓存中间出现故障，则缓存队列数据不会回写到数据库，而用户会认为已经完成，此时会带来比较明显的用户体验问题。<br>&emsp;&emsp;&emsp;&emsp;&emsp;◆        一个不彻底的解决方案是，确保高安全性，高重要性数据实时数据更新，而低安全性数据通过缓存异步回写方式完成。此外，使用相对数值操作而不是绝对数值操作更安全。<br>&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;■        范例：支付信息，道具的购买与获得，一旦丢失会对用户造成极大的伤害。而经验值，访问数字，如果只丢失了很少时间的内容，用户还是可以容忍的。<br>&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;■        范例：如果使用 Views=Views+…的操作，一旦出现数据格式错误，从 binlog 中反推是可以进行数据还原，但是如果使用 Views=特定值的操作，一旦缓存中数据有错误，则直接被赋予了一个错误数据，无法回溯！<br>&emsp;&emsp;&emsp;    异步更新如出现队列阻塞可能导致数据丢失风险。<br>&emsp;&emsp;&emsp;    异步更新通常是使用缓存队列后，在后台由 cron 或其他守护进程写入数据库。<br>如果队列生成的速度&gt;后台更新写入数据库的速度，就会产生阻塞，导致数据越累计越多，数据库响应迟缓，而缓存队列无法迅速执行，导致溢出或者过期失效。  </p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;h1 id=&quot;Mysql-架构优化&quot;&gt;&lt;a href=&quot;#Mysql-架构优化&quot; class=&quot;headerlink&quot; title=&quot;Mysql 架构优化&quot;&gt;&lt;/a&gt;Mysql 架构优化&lt;/h1&gt;&lt;h2 id=&quot;架构优化目标&quot;&gt;&lt;a href=&quot;#架构优化目标&quot; class=&quot;
+    
+    </summary>
+    
+      <category term="mysql" scheme="http://zhaoxj0217.github.io/categories/mysql/"/>
+    
+    
+      <category term="mysql" scheme="http://zhaoxj0217.github.io/tags/mysql/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Mysql 运维优化—mysql</title>
+    <link href="http://zhaoxj0217.github.io/2017/11/05/mysql_optimize_ops/"/>
+    <id>http://zhaoxj0217.github.io/2017/11/05/mysql_optimize_ops/</id>
+    <published>2017-11-05T06:27:40.844Z</published>
+    <updated>2017-11-05T06:42:40.931Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="Mysql-运维优化"><a href="#Mysql-运维优化" class="headerlink" title="Mysql 运维优化"></a>Mysql 运维优化</h1><h2 id="存储引擎类型"><a href="#存储引擎类型" class="headerlink" title="存储引擎类型"></a>存储引擎类型</h2><p>&emsp;•    Myisam 速度快，响应快。表级锁是致命问题。<br>&emsp;•    Innodb 目前主流存储引擎<br>&emsp;&emsp;&emsp;•    行级锁<br>&emsp;&emsp;&emsp;&emsp;&emsp;•    务必注意影响结果集的定义是什么<br>&emsp;&emsp;&emsp;&emsp;&emsp;•    行级锁会带来更新的额外开销，但是通常情况下是值得的。<br>&emsp;&emsp;&emsp;•    事务提交<br>&emsp;&emsp;&emsp;&emsp;&emsp;•    对 i/o 效率提升的考虑<br>&emsp;&emsp;&emsp;&emsp;&emsp;•    对安全性的考虑<br>&emsp;•    HEAP 内存引擎<br>&emsp;&emsp;&emsp;•    频繁更新和海量读取情况下仍会存在锁定状况  </p>
+<h2 id="内存使用考量"><a href="#内存使用考量" class="headerlink" title="内存使用考量"></a>内存使用考量</h2><p>&emsp;•    理论上，内存越大，越多数据读取发生在内存，效率越高<br>&emsp;•    要考虑到现实的硬件资源和瓶颈分布<br>&emsp;•    学会理解热点数据，并将热点数据尽可能内存化<br>&emsp;&emsp;&emsp;•    所谓热点数据，就是最多被访问的数据。<br>&emsp;&emsp;&emsp;•    通常数据库访问是不平均的，少数数据被频繁读写，而更多数据鲜有读写。<br>&emsp;&emsp;&emsp;•    学会制定不同的热点数据规则，并测算指标。<br>&emsp;&emsp;&emsp;&emsp;&emsp;•    热点数据规模，理论上，热点数据越少越好，这样可以更好的满足业务的增长趋势。<br>&emsp;&emsp;&emsp;&emsp;&emsp;•    响应满足度，对响应的满足率越高越好。<br>&emsp;&emsp;&emsp;&emsp;&emsp;•    比如依据最后更新时间，总访问量，回访次数等指标定义热点数据，并测算不同定义模式下的热点数据规模  </p>
+<h2 id="性能与安全性考量"><a href="#性能与安全性考量" class="headerlink" title="性能与安全性考量"></a>性能与安全性考量</h2><p>&emsp;•    数据提交方式<br>&emsp;&emsp;&emsp;•    innodb_flush_log_at_trx_commit = 1 每次自动提交，安全性高，i/o 压力大<br>&emsp;&emsp;&emsp;•    innodb_flush_log_at_trx_commit = 2 每秒自动提交，安全性略有影响，i/o 承载强。<br>&emsp;•    日志同步<br>&emsp;&emsp;&emsp;•    Sync-binlog    =1 每条自动更新，安全性高，i/o 压力大<br>&emsp;&emsp;&emsp;•    Sync-binlog = 0 根据缓存设置情况自动更新，存在丢失数据和同步延迟风险，i/o 承载力强。<br>&emsp;•    性能与安全本身存在相悖的情况，需要在业务诉求层面决定取舍<br>&emsp;&emsp;&emsp;•    学会区分什么场合侧重性能，什么场合侧重安全<br>&emsp;&emsp;&emsp;•    学会将不同安全等级的数据库用不同策略管理  </p>
+<h2 id="存储压力优化"><a href="#存储压力优化" class="headerlink" title="存储压力优化"></a>存储压力优化</h2><p>&emsp;•    顺序读写性能远高于随机读写<br>&emsp;•    日志类数据可以使用顺序读写方式进行<br>&emsp;•    将顺序写数据和随机读写数据分成不同的物理磁盘，有助于 i/o 压力的疏解，前提是，你确信你的 i/o 压力主要来自于可顺序写操作（因随机读写干扰导致不能顺序写，但是确实可以用顺序写方式进行的 i/o 操作）。  </p>
+<h2 id="运维监控体系"><a href="#运维监控体系" class="headerlink" title="运维监控体系"></a>运维监控体系</h2><p>&emsp;•    系统监控<br>&emsp;&emsp;&emsp;•    服务器资源监控<br>&emsp;&emsp;&emsp;&emsp;&emsp;•    Cpu, 内存，硬盘空间，i/o 压力<br>&emsp;&emsp;&emsp;&emsp;&emsp;•    设置阈值报警<br>&emsp;&emsp;&emsp;•    服务器流量监控<br>&emsp;&emsp;&emsp;&emsp;&emsp;•    外网流量，内网流量<br>&emsp;&emsp;&emsp;&emsp;&emsp;•    设置阈值报警<br>&emsp;&emsp;&emsp;•    连接状态监控<br>&emsp;&emsp;&emsp;&emsp;&emsp;•    Show processlist 设置阈值，每分钟监测，超过阈值记录<br>&emsp;•    应用监控<br>&emsp;&emsp;&emsp;•    慢查询监控<br>&emsp;&emsp;&emsp;&emsp;&emsp;•    慢查询日志<br>&emsp;&emsp;&emsp;&emsp;&emsp;•    如果存在多台数据库服务器，应有汇总查阅机制。<br>&emsp;&emsp;&emsp;•    请求错误监控<br>&emsp;&emsp;&emsp;&emsp;&emsp;•    高频繁应用中，会出现偶发性数据库连接错误或执行错误，将错误信息记录到日志，查看每日的比例变化。<br>&emsp;&emsp;&emsp;&emsp;&emsp;•    偶发性错误，如果数量极少，可以不用处理，但是需时常监控其趋势。<br>&emsp;&emsp;&emsp;&emsp;&emsp;•    会存在恶意输入内容，输入边界限定缺乏导致执行出错，需基于此防止恶意入侵探测行为。<br>&emsp;&emsp;&emsp;•    微慢查询监控<br>&emsp;&emsp;&emsp;&emsp;&emsp;•    高并发环境里，超过 0.01 秒的查询请求都应该关注一下。<br>&emsp;&emsp;&emsp;•    频繁度监控<br>&emsp;&emsp;&emsp;&emsp;&emsp;•    写操作，基于 binlog，定期分析。<br>&emsp;&emsp;&emsp;&emsp;&emsp;•    读操作，在前端 db 封装代码中增加抽样日志，并输出执行时间。<br>&emsp;&emsp;&emsp;&emsp;&emsp;•    分析请求频繁度是开发架构 进一步优化的基础<br>&emsp;&emsp;&emsp;&emsp;&emsp;•    最好的优化就是减少请求次数！</p>
+<h2 id="总结："><a href="#总结：" class="headerlink" title="总结："></a>总结：</h2><p>&emsp;&emsp;&emsp;•    监控与数据分析是一切优化的基础。<br>&emsp;&emsp;&emsp;•    没有运营数据监测就不要妄谈优化！<br>监控要注意不要产生太多额外的负载，不要因监控带来太多额外系统开销  </p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;h1 id=&quot;Mysql-运维优化&quot;&gt;&lt;a href=&quot;#Mysql-运维优化&quot; class=&quot;headerlink&quot; title=&quot;Mysql 运维优化&quot;&gt;&lt;/a&gt;Mysql 运维优化&lt;/h1&gt;&lt;h2 id=&quot;存储引擎类型&quot;&gt;&lt;a href=&quot;#存储引擎类型&quot; class=&quot;
+    
+    </summary>
+    
+      <category term="mysql" scheme="http://zhaoxj0217.github.io/categories/mysql/"/>
+    
+    
+      <category term="mysql" scheme="http://zhaoxj0217.github.io/tags/mysql/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>十条命令在一分钟内对机器性能问题进行诊断—linux</title>
+    <link href="http://zhaoxj0217.github.io/2017/11/05/linux_10_command/"/>
+    <id>http://zhaoxj0217.github.io/2017/11/05/linux_10_command/</id>
+    <published>2017-11-05T02:52:01.949Z</published>
+    <updated>2017-11-05T03:18:25.875Z</updated>
+    
+    <content type="html"><![CDATA[<p>&emsp;&lt;转&gt;如果你的Linux服务器突然负载暴增，告警短信快发爆你的手机，如何在最短时间内找出Linux性能问题所在？来看Netflix性能工程团队的这篇博文，看它们通过十条命令在一分钟内对机器性能问题进行诊断。<br>概述<br>通过执行以下命令，可以在1分钟内对系统资源使用情况有个大致的了解。<br>&emsp;•    uptime<br>&emsp;•    dmesg | tail<br>&emsp;•    vmstat 1<br>&emsp;•    mpstat -P ALL 1<br>&emsp;•    pidstat 1<br>&emsp;•    iostat -xz 1<br>&emsp;•    free -m<br>&emsp;•    sar -n DEV 1<br>&emsp;•    sar -n TCP,ETCP 1<br>&emsp;•    top<br>&emsp;其中一些命令需要安装sysstat包，有一些由procps包提供。这些命令的输出，有助于快速定位性能瓶颈，检查出所有资源（CPU、内存、磁盘IO等）的利用率（utilization）、饱和度（saturation）和错误（error）度量，也就是所谓的USE方法。<br>&emsp;下面我们来逐一介绍下这些命令，有关这些命令更多的参数和说明，请参照命令的手册。</p>
+<p>&emsp;<strong>uptime</strong> </p>
+<pre><code>$ uptime  
+23:51:26 up 21:31,  1 user,  load average: 30.02, 26.43, 19.02
+</code></pre><p>&emsp;这个命令可以快速查看机器的负载情况。在Linux系统中，这些数据表示等待CPU资源的进程和阻塞在不可中断IO进程（进程状态为D）的数量。这些数据可以让我们对系统资源使用有一个宏观的了解。<br>&emsp;命令的输出分别表示1分钟、5分钟、15分钟的平均负载情况。通过这三个数据，可以了解服务器负载是在趋于紧张还是区域缓解。如果1分钟平均负载很高，而15分钟平均负载很低，说明服务器正在命令高负载情况，需要进一步排查CPU资源都消耗在了哪里。反之，如果15分钟平均负载很高，1分钟平均负载较低，则有可能是CPU资源紧张时刻已经过去。<br>&emsp;上面例子中的输出，可以看见最近1分钟的平均负载非常高，且远高于最近15分钟负载，因此我们需要继续排查当前系统中有什么进程消耗了大量的资源。可以通过下文将会介绍的vmstat、mpstat等命令进一步排查。</p>
+<p>&emsp;<strong>dmesg | tail</strong></p>
+<pre><code>$ dmesg | tail  
+[1880957.563150] perl invoked oom-killer: gfp_mask=0x280da, order=0, oom_score_adj=0
+[...]
+[1880957.563400] Out of memory: Kill process 18694 (perl) score 246 or sacrifice child
+[1880957.563408] Killed process 18694 (perl) total-vm:1972392kB, anon-rss:1953348kB, file-rss:0kB
+[2320864.954447] TCP: Possible SYN flooding on port 7001. Dropping request.  Check SNMP counters.
+</code></pre><p>&emsp;该命令会输出系统日志的最后10行。示例中的输出，可以看见一次内核的oom kill和一次TCP丢包。这些日志可以帮助排查性能问题。千万不要忘了这一步。</p>
+<p>&emsp;<strong>vmstat 1</strong>   </p>
+<pre><code>$ vmstat 1
+procs ---------memory---------- ---swap-- -----io---- -system-- ------cpu-----
+ r  b swpd   free   buff  cache   si   sobibo   in   cs us sy id wa st
+34  00 200889792  73708 59182800 0 56   10 96  1  3  0  0
+32  00 200889920  73708 59186000 0   592 13284 4282 98  1  1  0  0
+32  00 200890112  73708 59186000 0 0 9501 2154 99  1  0  0  0
+32  00 200889568  73712 59185600 048 11900 2459 99  0  0  0  0
+32  00 200890208  73712 59186000 0 0 15898 4840 98  1  1  0  0
+^C
+</code></pre><p>vmstat(8) 命令，每行会输出一些系统核心指标，这些指标可以让我们更详细的了解系统状态。后面跟的参数1，表示每秒输出一次统计信息，表头提示了每一列的含义，这几介绍一些和性能调优相关的列：<br>&emsp;•    r：等待在CPU资源的进程数。这个数据比平均负载更加能够体现CPU负载情况，数据中不包含等待IO的进程。如果这个数值大于机器CPU核数，那么机器的CPU资源已经饱和。<br>&emsp;•    free：系统可用内存数（以千字节为单位），如果剩余内存不足，也会导致系统性能问题。下文介绍到的free命令，可以更详细的了解系统内存的使用情况。<br>&emsp;•    si, so：交换区写入和读取的数量。如果这个数据不为0，说明系统已经在使用交换区（swap），机器物理内存已经不足。<br>&emsp;•    us, sy, id, wa, st：这些都代表了CPU时间的消耗，它们分别表示用户时间（user）、系统（内核）时间（sys）、空闲时间（idle）、IO等待时间（wait）和被偷走的时间（stolen，一般被其他虚拟机消耗）。<br>上述这些CPU时间，可以让我们很快了解CPU是否出于繁忙状态。一般情况下，如果用户时间和系统时间相加非常大，CPU出于忙于执行指令。如果IO等待时间很长，那么系统的瓶颈可能在磁盘IO。<br>示例命令的输出可以看见，大量CPU时间消耗在用户态，也就是用户应用程序消耗了CPU时间。这不一定是性能问题，需要结合r队列，一起分析。 </p>
+<p>&emsp;<strong>mpstat -P ALL 1</strong>  </p>
+<pre><code>$ mpstat -P ALL 1
+Linux 3.13.0-49-generic (titanclusters-xxxxx)  07/14/2015  _x86_64_ (32 CPU)
+07:38:49 PM  CPU   %usr  %nice   %sys %iowait   %irq  %soft  %steal  %guest  %gnice  %idle
+07:38:50 PM  all  98.47   0.00   0.750.00   0.00   0.000.000.000.00   0.78
+07:38:50 PM0  96.04   0.00   2.970.00   0.00   0.000.000.000.00   0.99
+07:38:50 PM1  97.00   0.00   1.000.00   0.00   0.000.000.000.00   2.00
+07:38:50 PM2  98.00   0.00   1.000.00   0.00   0.000.000.000.00   1.00
+07:38:50 PM3  96.97   0.00   0.000.00   0.00   0.000.000.000.00   3.03
+[...]
+</code></pre><p>&emsp;该命令可以显示每个CPU的占用情况，如果有一个CPU占用率特别高，那么有可能是一个单线程应用程序引起的。<br>pidstat 1   </p>
+<pre><code>$ pidstat 1
+Linux 3.13.0-49-generic (titanclusters-xxxxx)  07/14/2015_x86_64_(32 CPU)
+07:41:02 PM   UID   PID%usr %system  %guest%CPU   CPU  Command
+07:41:03 PM 0 90.000.940.000.94 1  rcuos/0
+07:41:03 PM 0  42145.665.660.00   11.3215  mesos-slave
+07:41:03 PM 0  43540.940.940.001.89 8  java
+07:41:03 PM 0  6521 1596.231.890.00 1598.1127  java
+07:41:03 PM 0  6564 1571.707.550.00 1579.2528  java
+07:41:03 PM 60004 601540.944.720.005.66 9  pidstat
+07:41:03 PM   UID   PID%usr %system  %guest%CPU   CPU  Command
+07:41:04 PM 0  42146.002.000.008.0015  mesos-slave
+07:41:04 PM 0  6521 1590.001.000.00 1591.0027  java
+07:41:04 PM 0  6564 1573.00   10.000.00 1583.0028  java
+07:41:04 PM   108  67181.000.000.001.00 0  snmp-pass
+07:41:04 PM 60004 601541.004.000.005.00 9  pidstat
+^C
+</code></pre><p>&emsp;pidstat命令输出进程的CPU占用率，该命令会持续输出，并且不会覆盖之前的数据，可以方便观察系统动态。如上的输出，可以看见两个JAVA进程占用了将近1600%的CPU时间，既消耗了大约16个CPU核心的运算资源。</p>
+<p>&emsp;<strong>iostat -xz 1</strong>   </p>
+<pre><code>$ iostat -xz 1
+Linux 3.13.0-49-generic (titanclusters-xxxxx)  07/14/2015  _x86_64_ (32 CPU)
+avg-cpu:  %user   %nice %system %iowait  %steal   %idle
+  73.960.003.730.030.06   22.21
+Device:   rrqm/s   wrqm/s r/s w/srkB/swkB/s avgrq-sz avgqu-sz   await r_await w_await  svctm  %util
+xvda0.00 0.230.210.18 4.52 2.0834.37 0.009.98   13.805.42   2.44   0.09
+xvdb0.01 0.001.028.94   127.97   598.53   145.79 0.000.431.780.28   0.25   0.25
+xvdc0.01 0.001.028.86   127.79   595.94   146.50 0.000.451.820.30   0.27   0.26
+dm-00.00 0.000.692.3210.4731.6928.01 0.013.230.713.98   0.13   0.04
+dm-10.00 0.000.000.94 0.01 3.78 8.00 0.33  345.840.04  346.81   0.01   0.00
+dm-20.00 0.000.090.07 1.35 0.3622.50 0.002.550.235.62   1.78   0.03
+[...]
+^C
+</code></pre><p>&emsp;iostat命令主要用于查看机器磁盘IO情况。该命令输出的列，主要含义是：<br>&emsp;•    r/s, w/s, rkB/s, wkB/s：分别表示每秒读写次数和每秒读写数据量（千字节）。读写量过大，可能会引起性能问题。<br>&emsp;•    await：IO操作的平均等待时间，单位是毫秒。这是应用程序在和磁盘交互时，需要消耗的时间，包括IO等待和实际操作的耗时。如果这个数值过大，可能是硬件设备遇到了瓶颈或者出现故障。<br>&emsp;•    avgqu-sz：向设备发出的请求平均数量。如果这个数值大于1，可能是硬件设备已经饱和（部分前端硬件设备支持并行写入）。<br>&emsp;•    %util：设备利用率。这个数值表示设备的繁忙程度，经验值是如果超过60，可能会影响IO性能（可以参照IO操作平均等待时间）。如果到达100%，说明硬件设备已经饱和。<br>如果显示的是逻辑设备的数据，那么设备利用率不代表后端实际的硬件设备已经饱和。值得注意的是，即使IO性能不理想，也不一定意味这应用程序性能会不好，可以利用诸如预读取、写缓存等策略提升应用性能。</p>
+<p>&emsp;<strong>free –m</strong>   </p>
+<pre><code>$ free -m
+ total   used   free sharedbuffers cached
+Mem:245998  24545 221453 83 59541
+-/+ buffers/cache:  23944 222053
+Swap:0  0  0
+</code></pre><p>&emsp;free命令可以查看系统内存的使用情况，-m参数表示按照兆字节展示。最后两列分别表示用于IO缓存的内存数，和用于文件系统页缓存的内存数。需要注意的是，第二行-/+ buffers/cache，看上去缓存占用了大量内存空间。这是Linux系统的内存使用策略，尽可能的利用内存，如果应用程序需要内存，这部分内存会立即被回收并分配给应用程序。因此，这部分内存一般也被当成是可用内存。<br>&emsp;如果可用内存非常少，系统可能会动用交换区（如果配置了的话），这样会增加IO开销（可以在iostat命令中提现），降低系统性能。</p>
+<p>&emsp;<strong>sar -n DEV 1</strong> </p>
+<pre><code>$ sar -n DEV 1
+Linux 3.13.0-49-generic (titanclusters-xxxxx)  07/14/2015 _x86_64_(32 CPU)
+12:16:48 AM IFACE   rxpck/s   txpck/srxkB/stxkB/s   rxcmp/s   txcmp/s  rxmcst/s   %ifutil
+12:16:49 AM  eth0  18763.00   5032.00  20686.42478.30  0.00  0.00  0.00  0.00
+12:16:49 AMlo 14.00 14.00  1.36  1.36  0.00  0.00  0.00  0.00
+12:16:49 AM   docker0  0.00  0.00  0.00  0.00  0.00  0.00  0.00  0.00
+12:16:49 AM IFACE   rxpck/s   txpck/srxkB/stxkB/s   rxcmp/s   txcmp/s  rxmcst/s   %ifutil
+12:16:50 AM  eth0  19763.00   5101.00  21999.10482.56  0.00  0.00  0.00  0.00
+12:16:50 AMlo 20.00 20.00  3.25  3.25  0.00  0.00  0.00  0.00
+12:16:50 AM   docker0  0.00  0.00  0.00  0.00  0.00  0.00  0.00  0.00
+^C
+</code></pre><p>&emsp;sar命令在这里可以查看网络设备的吞吐率。在排查性能问题时，可以通过网络设备的吞吐量，判断网络设备是否已经饱和。如示例输出中，eth0网卡设备，吞吐率大概在22 Mbytes/s，既176 Mbits/sec，没有达到1Gbit/sec的硬件上限。</p>
+<p>&emsp;<strong>sar -n TCP,ETCP 1</strong> </p>
+<pre><code>$ sar -n TCP,ETCP 1
+Linux 3.13.0-49-generic (titanclusters-xxxxx)  07/14/2015_x86_64_(32 CPU)
+12:17:19 AM  active/s passive/siseg/soseg/s
+12:17:20 AM  1.00  0.00  10233.00  18846.00
+12:17:19 AM  atmptf/s  estres/s retrans/s isegerr/s   orsts/s
+12:17:20 AM  0.00  0.00  0.00  0.00  0.00
+12:17:20 AM  active/s passive/siseg/soseg/s
+12:17:21 AM  1.00  0.00   8359.00   6039.00
+12:17:20 AM  atmptf/s  estres/s retrans/s isegerr/s   orsts/s
+12:17:21 AM  0.00  0.00  0.00  0.00  0.00
+^C
+</code></pre><p>&emsp;sar命令在这里用于查看TCP连接状态，其中包括：<br>&emsp;•    active/s：每秒本地发起的TCP连接数，既通过connect调用创建的TCP连接；<br>&emsp;•    passive/s：每秒远程发起的TCP连接数，即通过accept调用创建的TCP连接；<br>&emsp;•    retrans/s：每秒TCP重传数量；<br>TCP连接数可以用来判断性能问题是否由于建立了过多的连接，进一步可以判断是主动发起的连接，还是被动接受的连接。TCP重传可能是因为网络环境恶劣，或者服务器压力过大导致丢包。  </p>
+<p>&emsp;<strong>top</strong></p>
+<pre><code>$ top  
+top - 00:15:40 up 21:56,  1 user,  load average: 31.09, 29.87, 29.92
+Tasks: 871 total,   1 running, 868 sleeping,   0 stopped,   2 zombie
+%Cpu(s): 96.8 us,  0.4 sy,  0.0 ni,  2.7 id,  0.1 wa,  0.0 hi,  0.0 si,  0.0 st
+KiB Mem:  25190241+total, 24921688 used, 22698073+free,60448 buffers
+KiB Swap:0 total,0 used,0 free.   554208 cached Mem
+   PID USER  PR  NIVIRTRESSHR S  %CPU %MEM TIME+ COMMAND
+ 20248 root  20   0  0.227t 0.012t  18748 S  3090  5.2  29812:58 java
+  4213 root  20   0 2722544  64640  44232 S  23.5  0.0 233:35.37 mesos-slave
+ 66128 titancl+  20   0   24344   2332   1172 R   1.0  0.0   0:00.07 top
+  5235 root  20   0 38.227g 547004  49996 S   0.7  0.2   2:02.74 java
+  4299 root  20   0 20.015g 2.682g  16836 S   0.3  1.1  33:14.42 java
+ 1 root  20   0   33620   2920   1496 S   0.0  0.0   0:03.82 init
+ 2 root  20   0   0  0  0 S   0.0  0.0   0:00.02 kthreadd
+ 3 root  20   0   0  0  0 S   0.0  0.0   0:05.35 ksoftirqd/0
+ 5 root   0 -20   0  0  0 S   0.0  0.0   0:00.00 kworker/0:0H
+ 6 root  20   0   0  0  0 S   0.0  0.0   0:06.94 kworker/u256:0
+ 8 root  20   0   0  0  0 S   0.0  0.0   2:38.05 rcu_sched
+</code></pre><p>&emsp;top命令包含了前面好几个命令的检查的内容。比如系统负载情况（uptime）、系统内存使用情况（free）、系统CPU使用情况（vmstat）等。因此通过这个命令，可以相对全面的查看系统负载的来源。同时，top命令支持排序，可以按照不同的列排序，方便查找出诸如内存占用最多的进程、CPU占用率最高的进程等。<br>&emsp;但是，top命令相对于前面一些命令，输出是一个瞬间值，如果不持续盯着，可能会错过一些线索。这时可能需要暂停top命令刷新，来记录和比对数据。  </p>
+<p>&emsp;<strong>总结</strong><br>&emsp;排查Linux服务器性能问题还有很多工具，上面介绍的一些命令，可以帮助我们快速的定位问题。例如前面的示例输出，多个证据证明有JAVA进程占用了大量CPU资源，之后的性能调优就可以针对应用程序进行。 </p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;&amp;emsp;&amp;lt;转&amp;gt;如果你的Linux服务器突然负载暴增，告警短信快发爆你的手机，如何在最短时间内找出Linux性能问题所在？来看Netflix性能工程团队的这篇博文，看它们通过十条命令在一分钟内对机器性能问题进行诊断。&lt;br&gt;概述&lt;br&gt;通过执行以下命令，可以在
+    
+    </summary>
+    
+      <category term="linux" scheme="http://zhaoxj0217.github.io/categories/linux/"/>
+    
+    
+      <category term="linux" scheme="http://zhaoxj0217.github.io/tags/linux/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>基于tensorflow的‘端到端’的字符型验证码识别—cnn</title>
+    <link href="http://zhaoxj0217.github.io/2017/11/02/captcha_by_cnn/"/>
+    <id>http://zhaoxj0217.github.io/2017/11/02/captcha_by_cnn/</id>
+    <published>2017-11-02T06:19:58.465Z</published>
+    <updated>2017-11-05T06:23:02.320Z</updated>
+    
+    <content type="html"><![CDATA[<p>因有个验证码识别的需求，本来打算用SVM来识别验证码，但在查询资料的过程中看到了@斗大的熊猫<br><a href="http://blog.topspeedsnail.com/archives/10858" target="_blank" rel="external">TensorFlow练习20: 使用深度学习破解字符验证码</a><br>这篇文章<br>在github上也找到了基于这篇文章的代码整合<br><a href="https://github.com/zhengwh/captcha-tensorflow" target="_blank" rel="external">基于tensorflow的‘端到端’的字符型验证码识别</a></p>
+<p>因为传统的机器学习方法，对于多位字符验证码都是采用的化整为零的方法：先分割成最小单位，再分别识别，然后再统一。同时还需对图片进行去躁，去干扰线等预处理，预处理的好坏直接影响识别率，所以想看下<br>卷积神经网络方法，是否真的更加通用简单，其他相关的说明都在这2个连接中</p>
+<p>本文的代码是在win7,python35环境下跑的<br>针对captcha-tensorflow的代码做了一些修改（主要是数据读取的方式的修改，原来的代码是直接代码生成验证码图片进行训练，本文需要训练的验证码是通过其他方式批量生成后再进行训练）</p>
+<p>修改后的代码目录与原来代码目录基本一致（去掉了没使用的验证码生成）</p>
+<pre><code>capt
+    __init__.py
+    cfg.py  配置信息文件
+    cnn_sys.py  CNN网络结构
+    data_iter.py 可迭代的数据集
+    predict.py 加载训练好的模型，然后对输入的图片进行预测
+    train.py 对模型进行训练
+    utils.py 一些公共使用的方法
+tmp
+work
+</code></pre><p>cfg.py就根据实际情况配置下<br>cnn_sys.py 需要根据你视图验证码的图像大小，做下计算参数上的小调整<br>predict.py 根据需要修改获取验证数据方式<br>train.py  有个须知的地方：</p>
+<pre><code># 从0开始训练数据
+# sess.run(tf.global_variables_initializer())
+
+#在训练一段时间后接着上次的训练
+saver.restore(sess, tf.train.latest_checkpoint(model_path))
+</code></pre><p>data_iter.py 提供数据与原来的方法有所区别:  </p>
+<pre><code>&quot;&quot;&quot;
+数据生成器
+&quot;&quot;&quot;
+import numpy as np
+
+from capt.cfg import IMAGE_HEIGHT, IMAGE_WIDTH, CHAR_SET_LEN, MAX_CAPTCHA,trainSpace,testSpace,verifySpace
+from capt.utils import convert2gray, text2vec
+from tensorflow.python.platform import gfile
+import os.path
+from PIL import Image
+import random
+from os.path import join
+
+no1 = 0
+no2 = 1
+dataSet = []
+testdataSet = []
+verifydataSet =[]
+
+#从相应文件夹内读取验证码图片
+def create_data_list(image_dir):
+    if not gfile.Exists(image_dir):
+        print(&quot;Image director &apos;&quot; + image_dir + &quot;&apos; not found.&quot;)
+        return None
+
+      extensions = [&apos;jpg&apos;]
+      print(&quot;Looking for images in &apos;&quot; + image_dir + &quot;&apos;&quot;)
+      file_list = []
+      for extension in extensions:
+        file_glob = os.path.join(image_dir, &apos;*.&apos; + extension)
+        file_list.extend(gfile.Glob(file_glob))
+      if not file_list:
+        print(&quot;No files found in &apos;&quot; + image_dir + &quot;&apos;&quot;)
+        return None
+
+      imageList = []
+      for file_name in file_list:
+        images = []
+        image = Image.open(file_name)
+        img_raw =  np.array(image)
+        image.close()
+        label_name = os.path.basename(file_name).split(&apos;_&apos;)[0]
+        images.append(img_raw)
+        images.append(label_name)
+        imageList.append(images)
+      print(&quot;create imgList finish!&quot;)
+      return imageList
+
+
+#生成训练数据
+def get_train_batch(batch_size=128):
+       #因为待训练的图片很多（几十万张）一次读取很占内存，将他们分成1万一个子文件夹
+    batch_x = np.zeros([batch_size, IMAGE_HEIGHT * IMAGE_WIDTH])
+    batch_y = np.zeros([batch_size, MAX_CAPTCHA * CHAR_SET_LEN])
+
+    global no1
+    no1= no1+1
+    print(&apos;no1&apos;,no1)
+    global no2
+    global dataSet
+    image_dir = join(trainSpace, no2)
+    if(no1&gt;n):#单个子集训练n个step
+           no1=0
+        no2 =no2+1
+        if (no2 &gt; j):#全部子集训练完后循环训练
+               no2 = 1
+        image_dir = join(trainSpace, no2)
+        dataSet = create_data_list(image_dir)
+        print(&quot;create trainSET&quot;)
+        print(&apos;image_dir&apos;, image_dir)
+    print(&apos;no2&apos;, no2)
+    if(not dataSet):
+        dataSet = create_data_list(image_dir)
+        print(&quot;create trainSET&quot;)
+        print(&apos;image_dir&apos;, image_dir)
+
+    for i in range(batch_size):
+        data = dataSet[random.randint(0, len(dataSet)-1)]#随机读取数据
+        image = data[0]
+        text = data[1]
+        image = convert2gray(image)
+        batch_x[i, :] = image.flatten() / 255  # (image.flatten()-128)/128  mean为0
+        batch_y[i, :] = text2vec(text)
+
+    return batch_x, batch_y
+
+#获取测试数据
+def get_test_batch(batch_size=128):
+
+    batch_x = np.zeros([batch_size, IMAGE_HEIGHT * IMAGE_WIDTH])
+    batch_y = np.zeros([batch_size, MAX_CAPTCHA * CHAR_SET_LEN])
+
+    global testdataSet
+    if(not testdataSet):
+           image_dir = testSpace
+        testdataSet = create_data_list(image_dir)
+        print(&quot;create testSET&quot;)
+
+    for i in range(batch_size):
+        data = testdataSet[random.randint(0, len(testdataSet)-1)]
+        image = data[0]
+        text = data[1]
+        image = convert2gray(image)
+        batch_x[i, :] = image.flatten() / 255  # (image.flatten()-128)/128  mean为0
+        batch_y[i, :] = text2vec(text)
+
+    return batch_x, batch_y
+
+#获取验证数据
+def get_verify():
+    global verifydataSet
+    if(not verifydataSet):
+        image_dir = &quot;D:\\tmp\\cnnImage\\verify4&quot;
+        verifydataSet = create_data_list(image_dir)
+        print(&quot;create verifySET&quot;)
+
+    data = verifydataSet[random.randint(0, len(verifydataSet)-1)]
+    image = data[0]
+    text = data[1]
+    return  text,image
+</code></pre><p>在监控文件所在盘 执行tensorboard –logdir=…<br>(这个cmd 命令与在百度上查询到的在linux上执行的不一样，需要注意)<br>就可以在tensorboard上查看监控图像，</p>
+<p>本次训练在经过2万个step 以后ACC达到95%，识别准确率在85%</p>
+<p><img src="http://chuantu.biz/t6/122/1509618243x3663627938.png" alt=""></p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;因有个验证码识别的需求，本来打算用SVM来识别验证码，但在查询资料的过程中看到了@斗大的熊猫&lt;br&gt;&lt;a href=&quot;http://blog.topspeedsnail.com/archives/10858&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;T
+    
+    </summary>
+    
+      <category term="python,CNN,tensorflow," scheme="http://zhaoxj0217.github.io/categories/python-CNN-tensorflow/"/>
+    
+    
+      <category term="python" scheme="http://zhaoxj0217.github.io/tags/python/"/>
+    
+      <category term="CNN" scheme="http://zhaoxj0217.github.io/tags/CNN/"/>
+    
+      <category term="深度学习" scheme="http://zhaoxj0217.github.io/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/"/>
+    
+      <category term="tensorflow" scheme="http://zhaoxj0217.github.io/tags/tensorflow/"/>
+    
+      <category term="captcha" scheme="http://zhaoxj0217.github.io/tags/captcha/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>scikit_learn preprocessing</title>
+    <link href="http://zhaoxj0217.github.io/2017/10/26/scikit_learn_preprocessing/"/>
+    <id>http://zhaoxj0217.github.io/2017/10/26/scikit_learn_preprocessing/</id>
+    <published>2017-10-26T07:54:57.875Z</published>
+    <updated>2017-10-26T08:07:12.438Z</updated>
+    
+    <content type="html"><![CDATA[<p>特征数据预处理<br>参考自（<a href="http://blog.csdn.net/sinat_33761963/article/details/53433799" target="_blank" rel="external">预处理数据的方法总结（使用sklearn-preprocessing）</a> ）</p>
+<ol>
+<li>标准化：去均值，方差规模化</li>
+</ol>
+<p>Standardization标准化:将特征数据的分布调整成标准正太分布，也叫高斯分布，也就是使得数据的均值维0，方差为1.</p>
+<p>标准化的原因在于如果有些特征的方差过大，则会主导目标函数从而使参数估计器无法正确地去学习其他特征。</p>
+<p>标准化的过程为两步：去均值的中心化（均值变为0）；方差的规模化（方差变为1）。</p>
+<p>在sklearn.preprocessing中提供了一个scale的方法，可以实现以上功能。</p>
+<pre><code>from sklearn import preprocessing
+import numpy as np
+x = np.array([[1., -1., 2.],
+  [2., 0., 0.],
+  [0., 1., -1.]])
+x_scale = preprocessing.scale(x)
+&gt;&gt;&gt;x_scale
+&gt;&gt;&gt;array([[ 0.        , -1.22474487,  1.33630621],
+   [ 1.22474487,  0.        , -0.26726124],
+   [-1.22474487,  1.22474487, -1.06904497]])
+&gt;&gt;&gt;x_scale.mean(axis=0)
+&gt;&gt;&gt;array([ 0.,  0.,  0.])
+&gt;&gt;&gt;x_scale.std(axis=0)
+&gt;&gt;&gt;array([ 1.,  1.,  1.])
+</code></pre><p>用数学公式计算的话   </p>
+<pre><code>#calculate mean
+x_mean = x.mean(axis=0)
+# calculate variance 
+x_std = x.std(axis=0)
+# standardize X
+x1 = (x-x_mean)/x_std
+</code></pre><p>x1的计算结果与上述使用preprocessing.scale 计算的结果一样</p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;特征数据预处理&lt;br&gt;参考自（&lt;a href=&quot;http://blog.csdn.net/sinat_33761963/article/details/53433799&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;预处理数据的方法总结（使用sklearn
+    
+    </summary>
+    
+      <category term="Machine Learning,python" scheme="http://zhaoxj0217.github.io/categories/Machine-Learning-python/"/>
+    
+    
+      <category term="Machine Learning" scheme="http://zhaoxj0217.github.io/tags/Machine-Learning/"/>
+    
+      <category term="python" scheme="http://zhaoxj0217.github.io/tags/python/"/>
+    
+      <category term="scikit_learn" scheme="http://zhaoxj0217.github.io/tags/scikit-learn/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>linear algebra知识点—math</title>
+    <link href="http://zhaoxj0217.github.io/2017/10/26/linear_algebra/"/>
+    <id>http://zhaoxj0217.github.io/2017/10/26/linear_algebra/</id>
+    <published>2017-10-26T01:39:54.128Z</published>
+    <updated>2017-10-26T01:39:54.183Z</updated>
+    
+    <summary type="html">
+    
+    </summary>
+    
+      <category term="linear algebra" scheme="http://zhaoxj0217.github.io/categories/linear-algebra/"/>
+    
+    
+      <category term="linear algebra" scheme="http://zhaoxj0217.github.io/tags/linear-algebra/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>NumPy—Python</title>
+    <link href="http://zhaoxj0217.github.io/2017/10/25/python_numpy/"/>
+    <id>http://zhaoxj0217.github.io/2017/10/25/python_numpy/</id>
+    <published>2017-10-25T08:35:03.611Z</published>
+    <updated>2017-10-25T08:35:03.672Z</updated>
+    
+    <summary type="html">
+    
+    </summary>
+    
+      <category term="python" scheme="http://zhaoxj0217.github.io/categories/python/"/>
+    
+    
+      <category term="python" scheme="http://zhaoxj0217.github.io/tags/python/"/>
+    
+      <category term="NumPy" scheme="http://zhaoxj0217.github.io/tags/NumPy/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>python正则表达式—Python</title>
+    <link href="http://zhaoxj0217.github.io/2017/10/25/python_regular/"/>
+    <id>http://zhaoxj0217.github.io/2017/10/25/python_regular/</id>
+    <published>2017-10-25T08:17:49.915Z</published>
+    <updated>2017-10-25T08:17:49.967Z</updated>
+    
+    <summary type="html">
+    
+    </summary>
+    
+      <category term="python" scheme="http://zhaoxj0217.github.io/categories/python/"/>
+    
+    
+      <category term="python" scheme="http://zhaoxj0217.github.io/tags/python/"/>
+    
+      <category term="正则表达式" scheme="http://zhaoxj0217.github.io/tags/%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>python基础—Python</title>
+    <link href="http://zhaoxj0217.github.io/2017/10/25/python_basics/"/>
+    <id>http://zhaoxj0217.github.io/2017/10/25/python_basics/</id>
+    <published>2017-10-25T08:14:56.527Z</published>
+    <updated>2017-10-26T07:15:26.158Z</updated>
+    
+    <content type="html"><![CDATA[<p>python 30分钟入门教程：<a href="https://learnxinyminutes.com/docs/python/" target="_blank" rel="external">Learn X in Y minutes</a></p>
+<p>一、python解释器<br>CPython：官方版本解释器，使用最广<br>IPython：基于CPython之上的一个交互式解释器<br>PyPy：目标是执行速度，对Python代码进行动态编译（注意不是解释）<br>Jython：运行在Java平台上的Python解释器<br>IronPython：运行在微软.Net平台上的Python解释器  </p>
+<p>二、输入输出<br>raw_input和print是在命令行下面最基本的输入和输出</p>
+<p>三、数据类型和变量<br>1.整数：<br>2.浮点数：<br>3.字符串：转义字符\ &amp; Python还允许用r’’表示’’内部的字符串默认不转义 &amp; Python允许用’’’…’’’的格式表示多行内容<br>4.布尔值：True、False（请注意大小写）<br>5.空值：None<br>6.变量：a = ‘ABC’时，Python解释器干了两件事情：<br>　　在内存中创建了一个’ABC’的字符串；<br>　　在内存中创建了一个名为a的变量，并把它指向’ABC’<br>7.list:[]有序集合，用-1做索引，直接获取最后一个元素<br>　　len(list):取长度<br>　　list.append(a)追加<br>　　list.insert(1，a)元素插入<br>　　list.pop()删除list末尾的元素<br>　　list.pop(i)删除置顶位置的元素<br>　　li =  [1, 2, 4, 3]<br>　　(It’s a closed/open range for you mathy types.)<br>　　li[1:3]  # =&gt; [2, 4]<br> 　　Omit the beginning<br>　　li[2:]  # =&gt; [4, 3]<br>　　 Omit the end<br>　　li[:3]  # =&gt; [1, 2, 4]<br> 　　Select every second entry<br>　　li[::2]  # =&gt;[1, 4]<br> 　　Reverse a copy of the list<br>　　li[::-1]  # =&gt; [3, 4, 2, 1]  </p>
+<p>8.tuple:()有序列表，一旦初始化后不能修改  Python在显示只有1个元素的tuple时，也会加一个逗号,，以免你误解成数学计算意义上的括号(1,)<br>9.dict:dict全称dictionary，在其他语言中也称为map，使用键-值（key-value）存储，具有极快的查找速度<br>　　dict提供的get方法，如果key不存在，可以返回None，或者自己指定的value：d.get(‘Thomas’, -1)<br>　　d.pop(key):删除key<br>10.set：在set中，没有重复的key<br>　　s.add(key)<br>　　s.remove(key)  </p>
+<p>四、函数<br>　　绝对值函数：abs(x)<br>　　帮助命令：help(abs)<br>　　比较函数：cmp(x,y)<br>　　转换:int()、float()、str()、unicode()、bool()<br>　　类型检查：isinstance（）</p>
+<p>五、函数的参数<br>　　要注意定义可变参数和关键字参数的语法：<br>　　<em>args是可变参数，args接收的是一个tuple；<br>　　*</em>kw是关键字参数，kw接收的是一个dict。<br>　　参数组合：参数定义的顺序必须是：必选参数、默认参数、可变参数和关键字参数。</p>
+<p>六、递归函数<br>　　使用递归函数需要注意防止栈溢出。在计算机中，函数调用是通过栈（stack）这种数据结构实现的，每当进入一个函数调用，栈就会加一层栈帧，每当函数返回，栈就会减一层栈帧。由于栈的大小不是无限的，所以，递归调用的次数过多，会导致栈溢出。<br>　　解决递归调用栈溢出的方法是通过尾递归优化，事实上尾递归和循环的效果是一样的，所以，把循环看成是一种特殊的尾递归函数也是可以的<br>　　尾递归是指，在函数返回的时候，调用自身本身，并且，return语句不能包含表达式。这样，编译器或者解释器就可以把尾递归做优化，使递归本身无论调用多少次，都只占用一个栈帧，不会出现栈溢出的情况。</p>
+<p>七、其他<br>    　　__future__：Python提供了__future__模块，把下一个新版本的特性导入到当前版本，于是我们就可以在当前版本中测试一些新版本的特性。</p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;python 30分钟入门教程：&lt;a href=&quot;https://learnxinyminutes.com/docs/python/&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;Learn X in Y minutes&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;一、pyth
+    
+    </summary>
+    
+      <category term="python" scheme="http://zhaoxj0217.github.io/categories/python/"/>
+    
+    
+      <category term="python" scheme="http://zhaoxj0217.github.io/tags/python/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Anaconda使用—Python</title>
+    <link href="http://zhaoxj0217.github.io/2017/10/25/Anaconda_python/"/>
+    <id>http://zhaoxj0217.github.io/2017/10/25/Anaconda_python/</id>
+    <published>2017-10-25T08:12:38.273Z</published>
+    <updated>2017-10-25T08:12:55.815Z</updated>
+    
+    <summary type="html">
+    
+    </summary>
+    
+      <category term="Machine Learning,python" scheme="http://zhaoxj0217.github.io/categories/Machine-Learning-python/"/>
+    
+    
+      <category term="Machine Learning" scheme="http://zhaoxj0217.github.io/tags/Machine-Learning/"/>
+    
+      <category term="python" scheme="http://zhaoxj0217.github.io/tags/python/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>数据科学的完整学习路径—Python版</title>
+    <link href="http://zhaoxj0217.github.io/2017/10/25/python_learning_for_ml/"/>
+    <id>http://zhaoxj0217.github.io/2017/10/25/python_learning_for_ml/</id>
+    <published>2017-10-25T07:29:33.343Z</published>
+    <updated>2017-10-25T08:31:21.336Z</updated>
+    
+    <content type="html"><![CDATA[<p>待消化的内容</p>
+<p>转自(<a href="http://dataunion.org/9805.html?utm_source=tuicool" target="_blank" rel="external">数据科学的完整学习路径—Python版</a>)</p>
+<p>从Python菜鸟到Python Kaggler的旅程（译注：Kaggle是一个数据建模和数据分析竞赛平台）</p>
+<p>假如你想成为一个数据科学家，或者已经是数据科学家的你想扩展你的技能，那么你已经来对地方了。本文的目的就是给数据分析方面的Python新手提供一个完整的学习路径。该路径提供了你需要学习的利用Python进行数据分析的所有步骤的完整概述。如果你已经有一些相关的背景知识，或者你不需要路径中的所有内容，你可以随意调整你自己的学习路径，并且让大家知道你是如何调整的。</p>
+<p>步骤0：热身</p>
+<p>开始学习旅程之前，先回答第一个问题：为什么使用Python？或者，Python如何发挥作用？<br>观看DataRobot创始人Jeremy在PyCon Ukraine 2014上的30分钟演讲，来了解Python是多么的有用。</p>
+<p>步骤1：设置你的机器环境</p>
+<p>现在你已经决心要好好学习了，也是时候设置你的机器环境了。最简单的方法就是从Continuum.io上下载分发包Anaconda。Anaconda将你以后可能会用到的大部分的东西进行了打包。采用这个方法的主要缺点是，即使可能已经有了可用的底层库的更新，你仍然需要等待Continuum去更新Anaconda包。当然如果你是一个初学者，这应该没什么问题。</p>
+<p>如果你在安装过程中遇到任何问题，你可以在这里找到不同操作系统下更详细的安装说明。</p>
+<p>步骤2：学习Python语言的基础知识</p>
+<p>你应该先去了解Python语言的基础知识、库和数据结构。Codecademy上的Python课程是你最好的选择之一。完成这个课程后，你就能轻松的利用Python写一些小脚本，同时也能理解Python中的类和对象。</p>
+<p>具体学习内容：列表Lists，元组Tuples，字典Dictionaries，列表推导式，字典推导式。<br>任务：解决HackerRank上的一些Python教程题，这些题能让你更好的用Python脚本的方式去思考问题。<br>替代资源：如果你不喜欢交互编码这种学习方式，你也可以学习谷歌的Python课程。这个2天的课程系列不但包含前边提到的Python知识，还包含了一些后边将要讨论的东西。</p>
+<p>步骤3：学习Python语言中的正则表达式</p>
+<p>你会经常用到正则表达式来进行数据清理，尤其是当你处理文本数据的时候。学习正则表达式的最好方法是参加谷歌的Python课程，它会让你能更容易的使用正则表达式。</p>
+<p>任务：做关于小孩名字的正则表达式练习。</p>
+<p>如果你还需要更多的练习，你可以参与这个文本清理的教程。数据预处理中涉及到的各个处理步骤对你来说都会是不小的挑战。</p>
+<p>步骤4：学习Python中的科学库—NumPy, SciPy, Matplotlib以及Pandas</p>
+<p>从这步开始，学习旅程将要变得有趣了。下边是对各个库的简介，你可以进行一些常用的操作：</p>
+<p>•根据<a href="http://scipy.github.io/old-wiki/pages/Tentative_NumPy_Tutorial" target="_blank" rel="external">NumPy教程</a>进行完整的练习，特别要练习数组arrays。这将会为下边的学习旅程打好基础。<br>•接下来学习<a href="https://docs.scipy.org/doc/scipy/reference/tutorial/" target="_blank" rel="external">Scipy教程</a>。看完Scipy介绍和基础知识后，你可以根据自己的需要学习剩余的内容。<br>•这里并不需要学习Matplotlib教程。对于我们这里的需求来说，Matplotlib的内容过于广泛。取而代之的是你可以学习<a href="http://nbviewer.jupyter.org/github/jrjohansson/scientific-python-lectures/blob/master/Lecture-4-Matplotlib.ipynb" target="_blank" rel="external">这个笔记</a>中前68行的内容。<br>•最后学习Pandas。Pandas为Python提供DataFrame功能（类似于R）。这也是你应该花更多的时间练习的地方。Pandas会成为所有中等规模数据分析的最有效的工具。作为开始，你可以先看一个关于Pandas的<a href="http://pandas.pydata.org/pandas-docs/stable/10min.html" target="_blank" rel="external">10分钟简短介绍</a>，然后学习一个更详细的<a href="http://www.gregreda.com/2013/10/26/intro-to-pandas-data-structures/" target="_blank" rel="external">Pandas教程</a>。<br>您还可以学习两篇博客<a href="http://www.analyticsvidhya.com/blog/2014/08/baby-steps-python-performing-exploratory-analysis-python/" target="_blank" rel="external">Exploratory Data Analysis with Pandas</a>和<a href="https://www.analyticsvidhya.com/blog/2016/01/complete-tutorial-learn-data-science-python-scratch-2/" target="_blank" rel="external">Data munging with Pandas</a>中的内容。</p>
+<p>额外资源：<br>•如果你需要一本关于Pandas和Numpy的书，建议Wes McKinney写的“Python for Data Analysis”。<br>•在Pandas的文档中，也有很多Pandas教程，你可以在这里查看。</p>
+<p>任务：尝试解决哈佛CS109课程的<a href="http://nbviewer.jupyter.org/github/cs109/2014/blob/master/homework/HW1.ipynb" target="_blank" rel="external">这个任务</a>。</p>
+<p>步骤5：有用的数据可视化</p>
+<p>参加CS109的<a href="http://cm.dce.harvard.edu/2015/01/14328/L03/screen_H264LargeTalkingHead-16x9.shtml" target="_blank" rel="external">这个课程</a>。你可以跳过前边的2分钟，但之后的内容都是干货。你可以根据<a href="http://nbviewer.jupyter.org/github/cs109/2014/blob/master/homework/HW2.ipynb" target="_blank" rel="external">这个任务</a>来完成课程的学习。</p>
+<p>步骤6：学习Scikit-learn库和机器学习的内容</p>
+<p>现在，我们要开始学习整个过程的实质部分了。Scikit-learn是机器学习领域最有用的Python库。这里是该库的简要概述。完成哈佛CS109课程的课程10到课程18，这些课程包含了机器学习的概述，同时介绍了像回归、决策树、整体模型等监督算法以及聚类等非监督算法。你可以根据各个课程的任务来完成相应的课程。</p>
+<p>额外资源：</p>
+<p>•如果说有那么一本书是你必读的，推荐Programming Collective Intelligence(集体智慧编程)。这本书虽然有点老，但依然是该领域最好的书之一。<br>•此外，你还可以参加来自Yaser Abu-Mostafa的机器学习课程，这是最好的机器学习课程之一。如果你需要更易懂的机器学习技术的解释，你可以选择来自Andrew Ng的机器学习课程，并且利用Python做相关的课程练习。<br>•Scikit-learn的教程</p>
+<p>任务：尝试Kaggle上的这个<a href="https://www.kaggle.com/c/data-science-london-scikit-learn" target="_blank" rel="external">挑战</a></p>
+<p>步骤7：练习，练习，再练习</p>
+<p>恭喜你，你已经完成了整个学习旅程。</p>
+<p>你现在已经学会了你需要的所有技能。现在就是如何练习的问题了，还有比通过在Kaggle上和数据科学家们进行竞赛来练习更好的方式吗？深入一个当前Kaggle上正在进行的比赛，尝试使用你已经学过的所有知识来完成这个比赛。</p>
+<p>步骤8：深度学习</p>
+<p>现在你已经学习了大部分的机器学习技术，是时候关注一下深度学习了。很可能你已经知道什么是深度学习，但是如果你仍然需要一个简短的介绍，可以看<a href="http://dataunion.org/9805.html?utm_source=tuicool" target="_blank" rel="external">这里</a>。</p>
+<p>我自己也是深度学习的新手，所以请有选择性的采纳下边的一些建议。deeplearning.net上有深度学习方面最全面的资源，在这里你会发现所有你想要的东西—讲座、数据集、挑战、教程等。你也可以尝试参加Geoff Hinton的课程，来了解神经网络的基本知识。</p>
+<p>附言：如果你需要大数据方面的库，可以试试Pydoop和PyMongo。大数据学习路线不是本文的范畴，是因为它自身就是一个完整的主题。</p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;待消化的内容&lt;/p&gt;
+&lt;p&gt;转自(&lt;a href=&quot;http://dataunion.org/9805.html?utm_source=tuicool&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;数据科学的完整学习路径—Python版&lt;/a&gt;)&lt;/p&gt;
+
+    
+    </summary>
+    
+      <category term="Machine Learning,python" scheme="http://zhaoxj0217.github.io/categories/Machine-Learning-python/"/>
+    
+    
+      <category term="Machine Learning" scheme="http://zhaoxj0217.github.io/tags/Machine-Learning/"/>
+    
+      <category term="python" scheme="http://zhaoxj0217.github.io/tags/python/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>机器学习参考地址</title>
+    <link href="http://zhaoxj0217.github.io/2017/10/24/Machine_Learning_Url/"/>
+    <id>http://zhaoxj0217.github.io/2017/10/24/Machine_Learning_Url/</id>
+    <published>2017-10-24T08:59:11.698Z</published>
+    <updated>2017-10-26T02:31:00.105Z</updated>
+    
+    <content type="html"><![CDATA[<p>待消化的内容</p>
+<p><a href="http://www.cnblogs.com/steven-yang/p/6348112.html" title="机器学习中的基本数学知识 - SNYang - 博客园" target="_blank" rel="external">机器学习中的基本数学知识 - SNYang - 博客园</a></p>
+<p><a href="https://zhuanlan.zhihu.com/p/25197792" title="机器学习理论篇1：机器学习的数学基础 - 知乎专栏" target="_blank" rel="external">机器学习理论篇1：机器学习的数学基础 - 知乎专栏</a></p>
+<p><a href="https://zhuanlan.zhihu.com/p/24799837" target="_blank" rel="external">数据科学入门篇1：数据科学完整学习路径 - 知乎专栏</a></p>
+<p><a href="http://www.jianshu.com/p/ed9ae5385b89" target="_blank" rel="external">浅谈机器学习基础（上）</a></p>
+<p><a href="http://www.jianshu.com/p/0359e3b7bb1b" target="_blank" rel="external">浅谈机器学习基础（下）</a></p>
+<p><a href="https://yq.aliyun.com/articles/204352?utm_content=m_30548" target="_blank" rel="external">机器学习的入门“秘籍” </a></p>
+<p><a href="http://python.jobbole.com/84326/" title="利用Python，四步掌握机器学习 - Python - 伯乐在线" target="_blank" rel="external">利用Python，四步掌握机器学习 - Python - 伯乐在线</a></p>
+<p><a href="https://www.liaoxuefeng.com/wiki/001374738125095c955c1e6d8bb493182103fac9270762a000" title="Python 2.7教程 - 廖雪峰的官方网站" target="_blank" rel="external">Python 2.7教程 - 廖雪峰的官方网站</a></p>
+<p><a href="http://blog.csdn.net/dinosoft/article/details/34960693" title="cs229 斯坦福机器学习笔记（一）-- 入门与LR模型 - CSDN博客" target="_blank" rel="external">cs229 斯坦福机器学习笔记（一）– 入门与LR模型 - CSDN博客</a></p>
+<p><a href="https://www.coursera.org/learn/machine-learning?authMode=signup" title="机器学习 | Coursera" target="_blank" rel="external">机器学习 | Coursera</a></p>
+<p><a href="https://www.kaggle.com/" target="_blank" rel="external">kaggle</a></p>
+<p><a href="http://www.cnblogs.com/ello/archive/2012/04/28/2475419.html" title="浅析人脸检测之Haar分类器方法 - ello - 博客园" target="_blank" rel="external">浅析人脸检测之Haar分类器方法 - ello - 博客园</a></p>
+<p><a href="https://mp.weixin.qq.com/s?__biz=MzA3MzI4MjgzMw==&amp;mid=2650724242&amp;idx=1&amp;sn=703d242700e29813d6c482daf6b211c5&amp;chksm=871b13ecb06c9afa28f8aad729496620078985e4eae8a1296fc407dbd70c1d70fabb3b2817fa&amp;scene=21#wechat_redirect" target="_blank" rel="external">只需十四步：从零开始掌握Python机器学习（附资源）</a></p>
+<p><a href="http://www.holehouse.org/mlclass/" target="_blank" rel="external">吴恩达的非官方笔记</a></p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;待消化的内容&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;http://www.cnblogs.com/steven-yang/p/6348112.html&quot; title=&quot;机器学习中的基本数学知识 - SNYang - 博客园&quot; target=&quot;_blank&quot; rel=&quot;extern
     
     </summary>
     

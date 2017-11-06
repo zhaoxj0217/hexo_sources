@@ -2,16 +2,107 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
-    <loc>http://zhaoxj0217.github.io/2017/10/24/Machine_Learning_Url/</loc>
+    <loc>http://zhaoxj0217.github.io/2017/11/05/mysql_optimize_execute/</loc>
     
-    <lastmod>2017-10-24T09:48:19.409Z</lastmod>
+    <lastmod>2017-11-06T02:13:36.676Z</lastmod>
     
   </url>
   
   <url>
-    <loc>http://zhaoxj0217.github.io/Tags/index.html</loc>
+    <loc>http://zhaoxj0217.github.io/2017/11/05/mysql_optimize_framework/</loc>
     
-    <lastmod>2017-10-09T10:29:55.461Z</lastmod>
+    <lastmod>2017-11-05T07:38:26.551Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://zhaoxj0217.github.io/2017/11/05/mysql_optimize_ops/</loc>
+    
+    <lastmod>2017-11-05T06:42:40.931Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://zhaoxj0217.github.io/2017/11/02/captcha_by_cnn/</loc>
+    
+    <lastmod>2017-11-05T06:23:02.320Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://zhaoxj0217.github.io/2017/11/05/linux_10_command/</loc>
+    
+    <lastmod>2017-11-05T03:18:25.875Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://zhaoxj0217.github.io/2017/10/26/scikit_learn_preprocessing/</loc>
+    
+    <lastmod>2017-10-26T08:07:12.438Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://zhaoxj0217.github.io/2017/10/25/python_basics/</loc>
+    
+    <lastmod>2017-10-26T07:15:26.158Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://zhaoxj0217.github.io/2017/10/24/Machine_Learning_Url/</loc>
+    
+    <lastmod>2017-10-26T02:31:00.105Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://zhaoxj0217.github.io/2017/10/26/linear_algebra/</loc>
+    
+    <lastmod>2017-10-26T01:39:54.183Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://zhaoxj0217.github.io/2017/10/25/python_numpy/</loc>
+    
+    <lastmod>2017-10-25T08:35:03.672Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://zhaoxj0217.github.io/2017/10/25/python_learning_for_ml/</loc>
+    
+    <lastmod>2017-10-25T08:31:21.336Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://zhaoxj0217.github.io/2017/10/25/python_regular/</loc>
+    
+    <lastmod>2017-10-25T08:17:49.967Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://zhaoxj0217.github.io/2017/10/25/Anaconda_python/</loc>
+    
+    <lastmod>2017-10-25T08:12:55.815Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://zhaoxj0217.github.io/tags/index.html</loc>
+    
+    <lastmod>2017-10-25T08:07:07.535Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://zhaoxj0217.github.io/categories/index.html</loc>
+    
+    <lastmod>2017-10-25T07:49:01.456Z</lastmod>
     
   </url>
   

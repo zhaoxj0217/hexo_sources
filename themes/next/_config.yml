@@ -208,7 +208,7 @@ excerpt_description: true
 # Automatically Excerpt. Not recommend.
 # Please use <!-- more --> in the post to control excerpt accurately.
 auto_excerpt:
-  enable: false
+  enable: true
   length: 150
 
 # Post meta display settings
@@ -476,7 +476,7 @@ duoshuo_info:
   ua_enable: true
   admin_enable: false
   user_id: 0
-  admin_nickname: ½­½«½´
+  admin_nickname: æ±Ÿå°†é…±
 
 # Post widgets & FB/VK comments settings.
 # ---------------------------------------------------------------
