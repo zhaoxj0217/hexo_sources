@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Machine Learning,python,SVM,captcha," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="zhaoxj0217_blog" type="application/atom+xml" />
+
+
+
+
+
+
+<meta name="description" content="&amp;emsp;&amp;emsp;支持向量机，因其英文名为support vector machine，故一般简称SVM，通俗来讲，它是一种二类分类模型，其基本模型定义为特征空间上的间隔最大的线性分类器，其学习策略便是间隔最大化，最终可转化为一个凸二次规划问题的求解。 支持向量机理论部分函数，图片都主要参考pluskid的SVM系列解密SVM系列简易解说拉格朗日对偶支持向量机推导过程   使用到的概念：L2">
+<meta name="keywords" content="Machine Learning,python,SVM,captcha">
+<meta property="og:type" content="article">
+<meta property="og:title" content="基于svm的验证码识别—svm">
+<meta property="og:url" content="http://zhaoxj0217.github.io/2017/11/14/captch_by_svm/index.html">
+<meta property="og:site_name" content="zhaoxj0217_blog">
+<meta property="og:description" content="&amp;emsp;&amp;emsp;支持向量机，因其英文名为support vector machine，故一般简称SVM，通俗来讲，它是一种二类分类模型，其基本模型定义为特征空间上的间隔最大的线性分类器，其学习策略便是间隔最大化，最终可转化为一个凸二次规划问题的求解。 支持向量机理论部分函数，图片都主要参考pluskid的SVM系列解密SVM系列简易解说拉格朗日对偶支持向量机推导过程   使用到的概念：L2">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://img.blog.csdn.net/20131107201211968">
+<meta property="og:image" content="https://i.loli.net/2017/11/17/5a0eacdf359a1.png">
+<meta property="og:image" content="https://www.zhihu.com/equation?tex=%5Cfrac%7B1%7D%7B%7C%7Cw%7C%7C%7D%28w%5ETx_0%2Bb%29">
+<meta property="og:image" content="https://ss1.baidu.com/6ONXsjip0QIZ8tyhnq/it/u=930595087,3467127615&fm=58">
+<meta property="og:image" content="http://img.blog.csdn.net/20131111155244218">
+<meta property="og:image" content="http://img.blog.csdn.net/20131111155205109">
+<meta property="og:image" content="http://img.blog.csdn.net/20140829141714944">
+<meta property="og:image" content="http://img.my.csdn.net/uploads/201210/25/1351141837_7366.jpg">
+<meta property="og:image" content="http://img.my.csdn.net/uploads/201210/25/1351141994_1802.jpg">
+<meta property="og:image" content="https://i.loli.net/2017/11/21/5a13936dd579a.png">
+<meta property="og:image" content="http://img.my.csdn.net/uploads/201210/25/1351142114_6643.jpg">
+<meta property="og:image" content="http://img.blog.csdn.net/20131107202220500">
+<meta property="og:image" content="http://img.my.csdn.net/uploads/201210/25/1351142449_6864.jpg">
+<meta property="og:image" content="http://img.my.csdn.net/uploads/201206/02/1338605996_4659.jpg">
+<meta property="og:image" content="http://img.my.csdn.net/uploads/201301/11/1357838666_9138.jpg">
+<meta property="og:image" content="http://img.my.csdn.net/uploads/201301/11/1357838696_3314.png">
+<meta property="og:image" content="https://i.loli.net/2017/11/23/5a168c634b8f0.png">
+<meta property="og:image" content="http://blog.pluskid.org/wp-content/uploads/2010/09/two_circles.png">
+<meta property="og:image" content="https://i.loli.net/2017/11/23/5a16906485992.png">
+<meta property="og:image" content="https://i.loli.net/2017/11/23/5a16913d93bb4.png">
+<meta property="og:image" content="https://i.loli.net/2017/11/23/5a1691d23687e.png">
+<meta property="og:image" content="https://i.loli.net/2017/11/23/5a16939e162e9.png">
+<meta property="og:image" content="https://i.loli.net/2017/11/23/5a16943560a92.png">
+<meta property="og:image" content="https://i.loli.net/2017/11/23/5a169594b3714.png">
+<meta property="og:image" content="https://i.loli.net/2017/11/23/5a16987ceecfb.png">
+<meta property="og:image" content="https://i.loli.net/2017/11/23/5a16997fd805c.png">
+<meta property="og:updated_time" content="2017-11-29T06:48:27.832Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="基于svm的验证码识别—svm">
+<meta name="twitter:description" content="&amp;emsp;&amp;emsp;支持向量机，因其英文名为support vector machine，故一般简称SVM，通俗来讲，它是一种二类分类模型，其基本模型定义为特征空间上的间隔最大的线性分类器，其学习策略便是间隔最大化，最终可转化为一个凸二次规划问题的求解。 支持向量机理论部分函数，图片都主要参考pluskid的SVM系列解密SVM系列简易解说拉格朗日对偶支持向量机推导过程   使用到的概念：L2">
+<meta name="twitter:image" content="http://img.blog.csdn.net/20131107201211968">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '江将酱'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://zhaoxj0217.github.io/2017/11/14/captch_by_svm/"/>
+
+
+
+
+
+  <title>基于svm的验证码识别—svm | zhaoxj0217_blog</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">zhaoxj0217_blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://zhaoxj0217.github.io/2017/11/14/captch_by_svm/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="zhaoxj0217">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/head.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="zhaoxj0217_blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">基于svm的验证码识别—svm</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-11-14T18:34:43+08:00">
+                2017-11-14
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/python-SVM-Machine-Learning/" itemprop="url" rel="index">
+                    <span itemprop="name">python,SVM,Machine Learning</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>&emsp;&emsp;支持向量机，因其英文名为support vector machine，故一般简称SVM，通俗来讲，它是一种二类分类模型，其基本模型定义为特征空间上的间隔最大的线性分类器，其学习策略便是间隔最大化，最终可转化为一个凸二次规划问题的求解。</p>
+<p>支持向量机理论部分函数，图片都主要参考<br><a href="http://blog.pluskid.org/?page_id=683" target="_blank" rel="external">pluskid的SVM系列</a><br><a href="http://blog.csdn.net/on2way/article/details/47729419" target="_blank" rel="external">解密SVM系列</a><br><a href="https://www.cnblogs.com/90zeng/p/Lagrange_duality.html" target="_blank" rel="external">简易解说拉格朗日对偶</a><br><a href="http://blog.sina.com.cn/s/blog_4298002e010144k8.html" target="_blank" rel="external">支持向量机推导过程</a>  </p>
+<p>使用到的概念：<br>L2范数<br>拉格朗日乘子法<br>KKT条件<br>强对偶<br>SMO算法</p>
+<p><strong>简单了解SVM</strong><br>&emsp;&emsp;给定一些数据点，它们分别属于两个不同的类，现在要找到一个线性分类器把这些数据分成两类。如果用x表示数据点，用y表示类别（y可以取1或者-1，分别代表两个不同的类），一个线性分类器的学习目标便是要在n维的数据空间中找到一个超平面（hyper plane），这个超平面的方程可以表示为<br><img src="http://img.blog.csdn.net/20131107201211968" alt="">(w为法向量，b为常量)当f(x) 等于0的时候，x便是位于超平面上的点，而f(x)大于0的点对应 y=1 的数据点，f(x)小于0的点对应y=-1的点，  </p>
+<p>(即线性方程:<br><img src="https://i.loli.net/2017/11/17/5a0eacdf359a1.png" width="300" height="30">)   </p>
+<p>支持向量到超平面的距离：<br><img src="https://www.zhihu.com/equation?tex=%5Cfrac%7B1%7D%7B%7C%7Cw%7C%7C%7D%28w%5ETx_0%2Bb%29" width="150" height="40"><br>其中||w||为w的二阶范数（2阶范数简单理解即是欧式距离）<br>（这样简单类推这个公式，在二维平面中，点到直线的距离 公式为<img src="https://ss1.baidu.com/6ONXsjip0QIZ8tyhnq/it/u=930595087,3467127615&amp;fm=58" alt=""> ）</p>
+<p>现在已知支持向量到超平面的距离公式，我们要怎么样找到一个最优的超平面。<br>从直观上而言，这个超平面应该是最适合分开两类数据的直线。而判定“最适合”的标准就是这条直线离直线两边的数据的间隔最大。所以，得寻找有着最大间隔的超平面。</p>
+<p> 如下图所示，中间的实线便是寻找到的最优超平面（Optimal Hyper Plane），其到两条虚线边界的距离相等，这个距离便是几何间隔r，两条虚线间隔边界之间的距离等于2r，而虚线间隔边界上的点则是支持向量。令函数间隔r等于1（之所以令等于1，是为了方便推导和优化，且这样做对目标函数的优化没有影响)由于这些支持向量刚好在虚线间隔边界上，所以它们满足<br><img src="http://img.blog.csdn.net/20131111155244218" alt=""><br>而对于所有不是支持向量的点，则显然有<br><img src="http://img.blog.csdn.net/20131111155205109" alt=""></p>
+<p><img src="http://img.blog.csdn.net/20140829141714944" alt=""></p>
+<p>从而上述目标函数转化成了<br><img src="http://img.my.csdn.net/uploads/201210/25/1351141837_7366.jpg" alt=""></p>
+<p>上述目标函数等价于（w由分母变成分子，从而也有原来的max问题变为min问题，很明显，两者问题等价）：<br><img src="http://img.my.csdn.net/uploads/201210/25/1351141994_1802.jpg" alt=""> </p>
+<p> 因为现在的目标函数是二次的，约束条件是线性的，所以它是一个凸二次规划问题。这个问题可以用现成的QP (Quadratic Programming) 优化包进行求解。一言以蔽之：在一定的约束条件下，目标最优，损失最小。   </p>
+<p><strong>深入SVM</strong><br>推导过程比较蛋疼，待研究<br>在求取有约束条件的优化问题时，拉格朗日乘子法（Lagrange Multiplier) 和KKT条件是非常重要的两个求取方法，对于等式约束的优化问题，可以应用拉格朗日乘子法去求取最优值；如果含有不等式约束，可以应用KKT条件去求取。当然，这两个方法求得的结果只是必要条件，只有当是凸函数的情况下，才能保证是充分必要条件。</p>
+<p>一. 拉格朗日乘子法（Lagrange Multiplier) 和KKT条件</p>
+<p>通常我们需要求解的最优化问题有如下几类：</p>
+<p>(i) 无约束优化问题，可以写为:</p>
+<pre><code>min f(x);  
+</code></pre><p>(ii) 有等式约束的优化问题，可以写为:</p>
+<pre><code>min f(x), 
+s.t. h_i(x) = 0; i =1, ..., n 
+</code></pre><p>(iii) 有不等式约束的优化问题，可以写为：</p>
+<pre><code>min f(x), 
+s.t. g_i(x) &lt;= 0; i =1, ..., n
+h_j(x) = 0; j =1, ..., m
+</code></pre><p>对于第(i)类的优化问题，使用求取f(x)的导数，然后令其为零，可以求得候选最优值，再在这些候选值中验证；如果是凸函数，可以保证是最优解。</p>
+<p>对于第(ii)类的优化问题，常常使用的方法就是拉格朗日乘子法（Lagrange Multiplier) ，即把等式约束h_i(x)用一个系数与f(x)写为一个式子，称为拉格朗日函数，而系数称为拉格朗日乘子。通过拉格朗日函数对各个变量求导，令其为零，可以求得候选值集合，然后验证求得最优值。</p>
+<p>对于第(iii)类的优化问题，常常使用的方法就是KKT条件。同样地，我们把所有的等式、不等式约束与f(x)写为一个式子，也叫拉格朗日函数，系数也称拉格朗日乘子，通过一些条件，可以求出最优值的必要条件，这个条件称为KKT条件。KKT条件是满足强对偶条件的优化问题的必要条件</p>
+<p>那么KKT条件的定理是什么呢？就是如果一个优化问题在转变完后变成<br><img src="https://i.loli.net/2017/11/21/5a13936dd579a.png" alt="svm_pic3.PNG"></p>
+<p>其中g是不等式约束，h是等式约束（像上面那个只有不等式约束，也可能有等式约束）。那么KKT条件就是函数的最优值必定满足下面条件：</p>
+<p>(1) L对各个x求导为零；<br>(2) h(x)=0;<br>(3) ∑αigi(x)=0，αi≥0<br>关于KKT条件的推导 <a href="https://www.cnblogs.com/90zeng/p/Lagrange_duality.html" target="_blank" rel="external">简易解说拉格朗日对偶（Lagrange duality）</a></p>
+<p>原问题优化为<br><img src="http://img.my.csdn.net/uploads/201210/25/1351142114_6643.jpg" alt=""><br>对w和b求偏导得到<br><img src="http://img.blog.csdn.net/20131107202220500" alt=""><br>将偏导得到的代入原方程得到<br><img src="http://img.my.csdn.net/uploads/201210/25/1351142449_6864.jpg" alt=""></p>
+<p>（2）求对α的极大，即是关于对偶问题的最优化问题。经过上面第一个步骤的求w和b，得到的拉格朗日函数式子已经没有了变量w，b，只有α。从上面的式子得到：<br><img src="http://img.my.csdn.net/uploads/201206/02/1338605996_4659.jpg" alt=""></p>
+<p>在求出a以后根据<br><img src="http://img.my.csdn.net/uploads/201301/11/1357838666_9138.jpg" alt="">求出w<br>根据<br><img src="http://img.my.csdn.net/uploads/201301/11/1357838696_3314.png" alt="">求出b</p>
+<p>原超平面可表示为<br><img src="https://i.loli.net/2017/11/23/5a168c634b8f0.png" alt="svm_pic4.PNG"></p>
+<p><strong>核函数</strong></p>
+<p><img src="http://blog.pluskid.org/wp-content/uploads/2010/09/two_circles.png" alt=""><br>前面我们介绍了线性情况下的支持向量机，它通过寻找一个线性的超平面来达到对数据进行分类的目的。不过，由于是线性方法，所以对非线性的数据就没有办法处理了。例如图中的两类数据，分别分布为两个圆圈的形状，不论是任何高级的分类器，只要它是线性的，就没法处理，SVM 也不行。因为这样的数据本身就是线性不可分的。<br>如果用 X1 和 X2 来表示这个二维平面的两个坐标的话，我们知道一条二次曲线（圆圈是二次曲线的一种特殊情况）的方程可以写作这样的形式：<br><img src="https://i.loli.net/2017/11/23/5a16906485992.png" alt="svm_pic5.PNG"></p>
+<p>注意上面的形式，如果我们构造另外一个五维的空间，其中五个坐标的值分别为 Z1=X1, Z2=X21, Z3=X2, Z4=X22, Z5=X1X2，那么显然，上面的方程在新的坐标系下可以写作：<br><img src="https://i.loli.net/2017/11/23/5a16913d93bb4.png" alt="svm_pic6.PNG"><br>关于新的坐标 Z ，这正是一个超平面的方程！<br>将 X 按照上面的规则映射为 Z ，那么在新的空间中原来的数据将变成线性可分的，从而使用之前我们推导的线性分类算法就可以进行处理了。这正是 Kernel 方法处理非线性问题的基本思想。<br>们通过一个映射 ϕ(⋅) 将其映射到一个高维空间中，数据变得线性可分了<br><img src="https://i.loli.net/2017/11/23/5a1691d23687e.png" alt="svm_pic7.PNG"></p>
+<p>刚才的方法稍想一下就会发现有问题：在最初的例子里，我们对一个二维空间做映射，选择的新空间是原始空间的所有一阶和二阶的组合，得到了五个维度；如果原始空间是三维，那么我们会得到 19 维的新空间（验算一下？），这个数目是呈爆炸性增长的，这给 ϕ(⋅) 的计算带来了非常大的困难，而且如果遇到无穷维的情况，就根本无从计算了。所以就需要 Kernel 出马了</p>
+<p>设两个向量 x1=(η1,η2)T 和 x2=(ξ1,ξ2)T ，而 ϕ(⋅) 即是到前面说的五维空间的映射，因此映射过后的内积为：<br><img src="https://i.loli.net/2017/11/23/5a16939e162e9.png" alt="svm_pic8.PNG"><br>同时<br>  <img src="https://i.loli.net/2017/11/23/5a16943560a92.png" alt="svm_pic9.PNG">  </p>
+<p>二者有很多相似的地方。区别在于什么地方呢？一个是映射到高维空间中，然后再根据内积的公式进行计算；而另一个则直接在原来的低维空间中进行计算，而不需要显式地写出映射后的结果。回忆刚才提到的映射的维度爆炸，在前一种方法已经无法计算的情况下，后一种方法却依旧能从容处理，甚至是无穷维度的情况也没有问题。</p>
+<p>我们把这里的计算两个向量在映射过后的空间中的内积的函数叫做核函数 (Kernel Function) ，例如，在刚才的例子中，我们的核函数为：<br><img src="https://i.loli.net/2017/11/23/5a169594b3714.png" alt="svm_pic10.PNG"></p>
+<p>核函数能简化映射空间中的内积运算——刚好“碰巧”的是，在我们的 SVM 里需要计算的地方数据向量总是以内积的形式出现的。对比刚才我们写出来的式子，现在我们的分类函数为：</p>
+<p><img src="https://i.loli.net/2017/11/23/5a16987ceecfb.png" alt="svm_pic11.PNG"></p>
+<p>其中 α 由如下 dual 问题计算而得：<br><img src="https://i.loli.net/2017/11/23/5a16997fd805c.png" alt="svm_pic12.PNG"><br>这样一来计算的问题就算解决了，避开了直接在高维空间中进行计算，而结果却是等价的</p>
+<p>通常人们会从一些常用的核函数中选择（根据问题和数据的不同，选择不同的参数，实际上就是得到了不同的核函数）<br>多项式核：<br>高斯核：<br>线性核：</p>
+<p><strong>松弛变量</strong></p>
+<p><strong>通过SMO算法求出α</strong></p>
+<p><strong>验证码识别</strong><br>验证码的处理跟之前KNN的处理一样，svm算法使用sklearn包里的svm算法</p>
+<pre><code># SVM Classifier using cross validation
+def svm_cross_validation(train_x, train_y):
+    from sklearn.model_selection import GridSearchCV
+    from sklearn.svm import SVC
+
+    model = SVC(kernel=&apos;rbf&apos;, probability=True,decision_function_shape=&apos;ovo&apos;)
+    param_grid = {&apos;C&apos;: [1e-3, 1e-2, 1e-1, 1, 10, 100, 1000], &apos;gamma&apos;: [0.001, 0.0001]}
+    grid_search = GridSearchCV(model, param_grid, n_jobs=1, verbose=1)
+    grid_search.fit(train_x, train_y)
+    best_parameters = grid_search.best_estimator_.get_params() #获取最佳参数
+    for para, val in best_parameters.items():
+        print
+        para, val
+    model = SVC(kernel=&apos;rbf&apos;, C=best_parameters[&apos;C&apos;], gamma=best_parameters[&apos;gamma&apos;], probability=True,decision_function_shape=&apos;ovo&apos;)
+    model.fit(train_x, train_y)
+        return model
+</code></pre>
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Machine-Learning/" rel="tag"># Machine Learning</a>
+          
+            <a href="/tags/python/" rel="tag"># python</a>
+          
+            <a href="/tags/SVM/" rel="tag"># SVM</a>
+          
+            <a href="/tags/captcha/" rel="tag"># captcha</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/11/07/captch_by_kNN/" rel="next" title="基于K近邻算法的验证码识别—knn">
+                <i class="fa fa-chevron-left"></i> 基于K近邻算法的验证码识别—knn
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/11/16/norm&Euclidean_distance/" rel="prev" title="机器学习中的范数及各种距离—数学基础">
+                机器学习中的范数及各种距离—数学基础 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+
+      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/head.jpg"
+                alt="zhaoxj0217" />
+            
+              <p class="site-author-name" itemprop="name">zhaoxj0217</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">20</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                
+                  <span class="site-state-item-count">14</span>
+                  <span class="site-state-item-name">分类</span>
+                
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">19</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          <div class="links-of-author motion-element">
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">zhaoxj0217</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.3"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

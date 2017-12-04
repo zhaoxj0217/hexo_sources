@@ -41,4 +41,5 @@ tags: [Machine Learning]
 [吴恩达的非官方笔记](http://www.holehouse.org/mlclass/)
 
 
+[常见算法整理](http://www.cnblogs.com/tornadomeet/p/3395593.html)
 
