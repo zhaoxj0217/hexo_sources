@@ -84,7 +84,7 @@
 <meta name="description" content="信息增益（香农熵/熵）熵是表示随机变量不确定性的度量条件熵H（Y|X）表示在已知随机变量X的条件下随机变量Y的不确定性信息增益表示得知特征X的信息而使得类Y的信息不确定性减少的程度定义:特征A对训练数据集D的信息增益g(D,A),定义为集合D的经验熵H（D）与特征A给定条件下D的经验条件熵H（D|A）之差，及g(D,A)=H(D)-H(D|A)信息增益比：特征A对训练数据集D的信息增益比gr(D,">
 <meta name="keywords" content="Machine Learning,decision tree">
 <meta property="og:type" content="article">
-<meta property="og:title" content="决策树之ID3算法">
+<meta property="og:title" content="决策树之ID3算法，C4.5">
 <meta property="og:url" content="http://zhaoxj0217.github.io/2017/11/29/Decision_Tree_Learning/index.html">
 <meta property="og:site_name" content="zhaoxj0217_blog">
 <meta property="og:description" content="信息增益（香农熵/熵）熵是表示随机变量不确定性的度量条件熵H（Y|X）表示在已知随机变量X的条件下随机变量Y的不确定性信息增益表示得知特征X的信息而使得类Y的信息不确定性减少的程度定义:特征A对训练数据集D的信息增益g(D,A),定义为集合D的经验熵H（D）与特征A给定条件下D的经验条件熵H（D|A）之差，及g(D,A)=H(D)-H(D|A)信息增益比：特征A对训练数据集D的信息增益比gr(D,">
@@ -95,9 +95,10 @@
 <meta property="og:image" content="https://i.loli.net/2017/12/04/5a251af3d52bb.png">
 <meta property="og:image" content="https://i.loli.net/2017/12/04/5a251f3e86411.png">
 <meta property="og:image" content="https://i.loli.net/2017/12/04/5a2522a745f9a.png">
-<meta property="og:updated_time" content="2017-12-04T10:25:51.407Z">
+<meta property="og:image" content="https://i.loli.net/2017/12/05/5a264e1eb0bc9.jpg">
+<meta property="og:updated_time" content="2017-12-05T08:19:30.739Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="决策树之ID3算法">
+<meta name="twitter:title" content="决策树之ID3算法，C4.5">
 <meta name="twitter:description" content="信息增益（香农熵/熵）熵是表示随机变量不确定性的度量条件熵H（Y|X）表示在已知随机变量X的条件下随机变量Y的不确定性信息增益表示得知特征X的信息而使得类Y的信息不确定性减少的程度定义:特征A对训练数据集D的信息增益g(D,A),定义为集合D的经验熵H（D）与特征A给定条件下D的经验条件熵H（D|A）之差，及g(D,A)=H(D)-H(D|A)信息增益比：特征A对训练数据集D的信息增益比gr(D,">
 <meta name="twitter:image" content="https://i.loli.net/2017/12/04/5a251868957b2.png">
 
@@ -135,7 +136,7 @@
 
 
 
-  <title>决策树之ID3算法 | zhaoxj0217_blog</title>
+  <title>决策树之ID3算法，C4.5 | zhaoxj0217_blog</title>
   
 
 
@@ -279,7 +280,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">决策树之ID3算法</h1>
+          <h1 class="post-title" itemprop="name headline">决策树之ID3算法，C4.5</h1>
         
 
         <div class="post-meta">
@@ -314,8 +315,8 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/decision-tree-Machine-Learning-ID3/" itemprop="url" rel="index">
-                    <span itemprop="name">decision tree,Machine Learning,ID3</span>
+                  <a href="/categories/decision-tree-Machine-Learning-ID3-C4-5/" itemprop="url" rel="index">
+                    <span itemprop="name">decision tree,Machine Learning,ID3,C4.5</span>
                   </a>
                 </span>
 
@@ -364,6 +365,67 @@
 <p><img src="https://i.loli.net/2017/12/04/5a251f3e86411.png" alt="gD2A.PNG">  </p>
 <p>选择信息增益最大的特征A2作为节点的特征，由于A2有两个可能取值，从这一节点引出两个子节点，一个对应“是”，包含3个样本，它们属于同一类，所以这是一个叶结点，另一个是对应“否”，包含6个样本，他们也属于同一类，所以这也是一个叶结点，类标记为“否”<br>最终生成决策树  </p>
 <p><img src="https://i.loli.net/2017/12/04/5a2522a745f9a.png" alt="decision_final.PNG"></p>
+<p>ID3算法存在的缺点</p>
+<p>（1）ID3算法在选择根节点和各内部节点中的分支属性时，采用信息增益作为评价标准。信息增益的缺点是倾向于选择取值较多的属性，在有些情况下这类属性可能不会提供太多有价值的信息。<br>（2）ID3算法只能对描述属性为离散型属性的数据集构造决策树。 </p>
+<p>C4.5的生成算法<br>C4.5算法与ID3算法相似，C4.5在生成的过程中，用信息增益率来选择特征</p>
+<p>使用信息增益的问题：假设每个属性中没中类别都只有一个样本，这样的属性信息熵就等于零，根据信息增益就无法选择出有效分类特征</p>
+<p>计算属性分裂信息度量<br>用分裂信息度量来考量某种属性进行分裂时分支的数量信息和尺寸信息，我们把这些信息成为属性的内在信息，信息增益率= 信息增益/内在信息，会导致属性的重要性随着内在信息的增大而减小（也就是说，如果这个属性本身不确定性就很大，那我就越不倾向于选取他）</p>
+<p>上述A1，A2，A3，A4信息增益率计算<br><img src="https://i.loli.net/2017/12/05/5a264e1eb0bc9.jpg" alt="IMG_1260.JPG"></p>
+<p>输入：训练数据集D，特征集A，阈值ε<br>输出：决策树T<br>（1）若D中所有实例属于同一类Ck,则T为单结点树，并将类Ck作该结点的类标记，返回T；<br>（2）若A=Ø，则T为单结点树，并将D中实例数最大的类Ck作为该结点的类标记，返回T；<br>（3）否则，计算A中各特征对D的信息增益比，选择信息增益比最大的特征Ag；<br>（4）如果Ag的信息增益比小于阈值ε，则置T为单结点树，并将D中实例数最大的类Ck作为该结点的类标记，返回T；<br>（5）否则，对Ag的每一个可能值ai，依Ag=ai将D分割为若干非空子集Di,将Di中实例数最大的类作为标记，构建子结点，由结点及其子结点构成树T，返回T<br>（6）对第i个子结点，以Di为训练集，以A-{Ag}为特征集，递归地调用步1~步5，得到子树Ti,返回Ti  </p>
+<p>决策树的剪枝<br>在决策树学习中将已生成的树进行简化的过程称为剪枝。剪枝一般分两种方法：先剪枝和后剪枝。  </p>
+<p>先剪枝<br> 先剪枝方法中通过提前停止树的构造（比如决定在某个节点不再分裂或划分训练元组的子集）而对树剪枝。一旦停止，这个节点就变成树叶，该树叶可能取它持有的子集最频繁的类作为自己的类。先剪枝有很多方法:  </p>
+<ul>
+<li>（1）当决策树达到一定的高度就停止决策树的生长；</li>
+<li>（2）到达此节点的实例具有相同的特征向量，而不必一定属于同一类，也可以停止生长</li>
+<li>（3）到达此节点的实例个数小于某个阈值的时候也可以停止树的生长，不足之处是不能处理那些数据量比较小的特殊情况  </li>
+<li>（4）计算每次扩展对系统性能的增益，如果小于某个阈值就可以让它停止生长。先剪枝有个缺点就是视野效果问题，也就是说在相同的标准下，也许当前扩展不能满足要求，但更进一步扩展又能满足要求。这样会过早停止决策树的生长。  </li>
+</ul>
+<p>后剪枝<br>更常用的方法是后剪枝，它由完全成长的树剪去子树而形成。通过删除节点的分枝并用树叶来替换它。树叶一般用子树中最频繁的类别来标记。后剪枝一般有两种方法：   </p>
+<ul>
+<li><p>第一种方法，也是最简单的方法，<strong>称之为基于误判的剪枝</strong>。这个思路很直接，完全的决策树不是过度拟合么，我再搞一个测试数据集来纠正它。对于完全决策树中的每一个非叶子节点的子树，我们尝试着把它替换成一个叶子节点，该叶子节点的类别我们用子树所覆盖训练样本中存在最多的那个类来代替，这样就产生了一个简化决策树，然后比较这两个决策树在测试数据集中的表现，如果简化决策树在测试数据集中的错误比较少，并且该子树里面没有包含另外一个具有类似特性的子树（所谓类似的特性，指的就是把子树替换成叶子节点后，其测试数据集误判率降低的特性），那么该子树就可以替换成叶子节点。该算法以bottom-up的方式遍历所有的子树，直至没有任何子树可以替换使得测试数据集的表现得以改进时，算法就可以终止。</p>
+</li>
+<li><p>第一种方法很直接，但是需要一个额外的测试数据集，能不能不要这个额外的数据集呢？为了解决这个问题，于是就提出了<strong>悲观剪枝</strong>。悲观剪枝就是递归得估算每个内部节点所覆盖样本节点的误判率。剪枝后该内部节点会变成一个叶子节点，该叶子节点的类别为原内部节点的最优叶子节点所决定。然后比较剪枝前后该节点的错误率来决定是否进行剪枝。该方法和前面提到的第一种方法思路是一致的，不同之处在于如何估计剪枝前分类树内部节点的错误率。</p>
+</li>
+</ul>
+<p><em>对于连续数据的处理</em><br>离散化处理：将连续型的属性变量进行离散化处理，形成决策树的训练集，分三步： </p>
+<ul>
+<li><ol>
+<li>把需要处理的样本（对应根节点）或样本子集（对应子树）按照连续变量的大小从小到大进行排序  </li>
+</ol>
+</li>
+<li><ol>
+<li>假设该属性对应的不同的属性值一共有N个，那么总共有N-1个可能的候选分割阈值点，每个候选的分割阈值点的值为上述排序后的属性值中两两前后连续元素的中点  </li>
+</ol>
+</li>
+<li><ol>
+<li>用信息增益率选择最佳划分  </li>
+</ol>
+</li>
+</ul>
+<p><em>对于缺失值的处理</em><br>缺失值：在某些情况下，可供使用的数据可能缺少某些属性的值。例如(X, y)是样本集S中的一个训练实例，X=(F1_v,F2_v, …Fn_v)。但是其属性Fi的值Fi_v未知。<br>处理策略：  </p>
+<ul>
+<li><ol>
+<li>处理缺少属性值的一种策略是赋给它结点t所对应的训练实例中该属性的最常见值  </li>
+</ol>
+</li>
+<li><ol>
+<li>另外一种更复杂的策略是为Fi的每个可能值赋予一个概率。例如，给定一个布尔属性Fi，如果结点t包含6个已知Fi_v=1和4个Fi_v=0的实例，那么Fi_v=1的概率是0.6，而Fi_v=0的概率是0.4。于是，实例x的60%被分配到Fi_v=1的分支，40%被分配到另一个分支。这些片断样例（fractional examples）的目的是计算信息增益，另外，如果有第二个缺少值的属性必须被测试，这些样例可以在后继的树分支中被进一步细分。(C4.5中使用)  </li>
+</ol>
+</li>
+<li><ol>
+<li>简单处理策略就是丢弃这些样本  </li>
+</ol>
+</li>
+</ul>
+<p>C4.5算法的核心思想是ID3算法，是ID3算法的改进：  </p>
+<ul>
+<li>用信息增益率来选择属性，克服了用信息增益来选择属性时变相选择取值多的属性的不足；  </li>
+<li>在树的构造过程中进行剪枝；  </li>
+<li>能处理非离散化数据；  </li>
+<li>能处理不完整数据。  </li>
+</ul>
+<p>优点：<br>产生的分类规则易于理解，准确率高。  </p>
+<p>缺点：<br>在构造过程中，需要对数据集进行多次的顺序扫描和排序，因而导致算法的低效；<br>C4.5算法只适合于能够驻留内存的数据集，当训练集大得无法在内存容纳时，程序无法运行</p>
 
       
     </div>
@@ -480,7 +542,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">20</span>
+                  <span class="site-state-item-count">25</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -491,7 +553,7 @@
               
               <div class="site-state-item site-state-categories">
                 
-                  <span class="site-state-item-count">14</span>
+                  <span class="site-state-item-count">17</span>
                   <span class="site-state-item-name">分类</span>
                 
               </div>
@@ -502,7 +564,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/categories/index.html">
-                  <span class="site-state-item-count">19</span>
+                  <span class="site-state-item-count">23</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>

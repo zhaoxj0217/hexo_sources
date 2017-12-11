@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="linux,accident handling," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="zhaoxj0217_blog" type="application/atom+xml" />
+
+
+
+
+
+
+<meta name="description" content="1.服务假死现象一般如下，比如：服务器没有后续日志输出，或者接口只有进的日志，没有出的日志。 操作步骤： 1）联系运维，在出问题的服务器上输入以下命令，保存当前stack日志：   jstack -l  服务pid &amp;gt; stack.log  2）打开保存的日志，分析主线当前状态，搜索”main”，比如下面日志标识主线程当前在sleep：   &amp;quot;main&amp;quot; #1 prio=">
+<meta name="keywords" content="linux,accident handling">
+<meta property="og:type" content="article">
+<meta property="og:title" content="线上问题处理-服务假死">
+<meta property="og:url" content="http://zhaoxj0217.github.io/2017/12/06/product_handle_service_suspended/index.html">
+<meta property="og:site_name" content="zhaoxj0217_blog">
+<meta property="og:description" content="1.服务假死现象一般如下，比如：服务器没有后续日志输出，或者接口只有进的日志，没有出的日志。 操作步骤： 1）联系运维，在出问题的服务器上输入以下命令，保存当前stack日志：   jstack -l  服务pid &amp;gt; stack.log  2）打开保存的日志，分析主线当前状态，搜索”main”，比如下面日志标识主线程当前在sleep：   &amp;quot;main&amp;quot; #1 prio=">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://i.loli.net/2017/12/06/5a278e71877cf.png">
+<meta property="og:updated_time" content="2017-12-07T01:46:01.327Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="线上问题处理-服务假死">
+<meta name="twitter:description" content="1.服务假死现象一般如下，比如：服务器没有后续日志输出，或者接口只有进的日志，没有出的日志。 操作步骤： 1）联系运维，在出问题的服务器上输入以下命令，保存当前stack日志：   jstack -l  服务pid &amp;gt; stack.log  2）打开保存的日志，分析主线当前状态，搜索”main”，比如下面日志标识主线程当前在sleep：   &amp;quot;main&amp;quot; #1 prio=">
+<meta name="twitter:image" content="https://i.loli.net/2017/12/06/5a278e71877cf.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '江将酱'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://zhaoxj0217.github.io/2017/12/06/product_handle_service_suspended/"/>
+
+
+
+
+
+  <title>线上问题处理-服务假死 | zhaoxj0217_blog</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">zhaoxj0217_blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://zhaoxj0217.github.io/2017/12/06/product_handle_service_suspended/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="zhaoxj0217">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/head.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="zhaoxj0217_blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">线上问题处理-服务假死</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-12-06T10:39:08+08:00">
+                2017-12-06
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/accident-handling-linux/" itemprop="url" rel="index">
+                    <span itemprop="name">accident handling,linux</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>1.服务假死<br>现象一般如下，比如：服务器没有后续日志输出，或者接口只有进的日志，没有出的日志。</p>
+<p>操作步骤：<br> 1）联系运维，在出问题的服务器上输入以下命令，保存当前stack日志：  </p>
+<pre><code>jstack -l  服务pid &gt; stack.log
+</code></pre><p> 2）打开保存的日志，分析主线当前状态，<font color="#DC143C">搜索”main”</font>，比如下面日志标识主线程当前在sleep：  </p>
+<pre><code>&quot;main&quot; #1 prio=5 os_prio=0 tid=0x00007faf9c00a000 nid=0x7661 waiting on condition [0x00007fafa36a8000]
+java.lang.Thread.State: TIMED_WAITING (sleeping)
+at java.lang.Thread.sleep(Native Method)
+</code></pre><p> 3）打开保存的日志，分析可能存在的死锁，<font color="#DC143C">搜索”deadlock”或者”BLOCKED”</font>， 比如下面日志，表示可能存在死锁：  </p>
+<pre><code> &quot;IdleRemover&quot; daemon prio=10 tid=0x00007f6b2c148800 nid=0x11d7 waiting on condition [0x00007f6b222e1000]
+   java.lang.Thread.State: TIMED_WAITING (parking)
+ at sun.misc.Unsafe.park(Native Method)
+......
+ Locked ownable synchronizers://正常情况下，线程不会有：Locked ownable synchronizers信息
+  - &lt;0x0000000765df4068&gt; (a java.util.concurrent.ThreadPoolExecutor$Worker)
+</code></pre><p>4）如果线程信息没有异常，需要确认FGC是否存在问题？比如： 频繁full gc 或者单词full gc时间较长。</p>
+<pre><code>jstat  -gcutil pid 2500 70
+[root@iZbp1aehttqhrozii8qa5iZ Python-3.6.3]# jstat -gcutil 10567 2500 70
+S0  S1   E   O  MCCS  YGC YGCT FGC FGCT GCT 
+0.00 54.17 19.32 17.82 97.59 95.77 1777 11.596 4 0.898 12.494
+0.00 54.17 19.58 17.82 97.59 95.77 1777 11.596 4 0.898 12.494
+0.00 54.17 19.82 17.82 97.59 95.77 1777 11.596 4 0.898 12.494
+0.00 54.17 20.16 17.82 97.59 95.77 1777 11.596 4 0.898 12.494
+</code></pre><p>S0 — Heap上的 Survivor space 0 区已使用空间的百分比<br>S1 — Heap上的 Survivor space 1 区已使用空间的百分比<br>E — Heap上的 Eden space 区已使用空间的百分比<br>O — Heap上的 Old space 区已使用空间的百分比<br>P — Perm space 区已使用空间的百分比<br>YGC — 从应用程序启动到采样时发生 Young GC 的次数<br>YGCT– 从应用程序启动到采样时 Young GC 所用的时间（单位秒）<br>FGC — 从应用程序启动到采样时发生 Full GC 的次数<br>FGCT– 从应用程序启动到采样时 Full GC 所用的时间（单位秒）<br>GCT — 从应用程序启动到采样时用于垃圾回收的总时间（单位秒）  </p>
+<p><strong>jstack Dump 日志文件中的线程状态</strong><br>dump 文件里，值得关注的线程状态有：  </p>
+<ul>
+<li><ol>
+<li>死锁，<font color="#DC143C"> Deadlock（重点关注）</font>   </li>
+</ol>
+</li>
+<li><ol>
+<li>执行中，Runnable     </li>
+</ol>
+</li>
+<li><ol>
+<li>等待资源，<font color="#DC143C"> Waiting on condition（重点关注</font>）   </li>
+</ol>
+</li>
+<li><ol>
+<li>等待获取监视器，<font color="#DC143C"> Waiting on monitor entry（重点关注）</font>  </li>
+</ol>
+</li>
+<li><ol>
+<li>暂停，Suspended  </li>
+</ol>
+</li>
+<li><ol>
+<li>对象等待中，Object.wait() 或 TIMED_WAITING  </li>
+</ol>
+</li>
+<li><ol>
+<li>阻塞，<font color="#DC143C"> Blocked（重点关注）</font>    </li>
+</ol>
+</li>
+<li><ol>
+<li>停止，Parked  </li>
+</ol>
+</li>
+</ul>
+<p><strong>Dump文件中的线程状态含义及注意事项</strong></p>
+<p>•    <strong>Deadlock</strong>：死锁线程，一般指多个线程调用间，进入相互资源占用，导致一直等待无法释放的情况。</p>
+<p>•    <strong>Runnable</strong>：一般指该线程正在执行状态中，该线程占用了资源，正在处理某个请求，有可能正在传递SQL到数据库执行，有可能在对某个文件操作，有可能进行数据类型等转换。</p>
+<p>•    <strong>Waiting on condition</strong>：等待资源，或等待某个条件的发生。具体原因需结合 stacktrace来分析。 </p>
+<ul>
+<li>如果堆栈信息明确是应用代码，则证明该线程正在等待资源。一般是大量读取某资源，且该资源采用了资源锁的情况下，线程进入等待状态，等待资源的读取。  </li>
+<li>又或者，正在等待其他线程的执行等。  </li>
+<li>如果发现有大量的线程都在处在 Wait on condition，从线程 stack看，正等待网络读写，这可能是一个网络瓶颈的征兆。因为网络阻塞导致线程无法执行。<br>–    一种情况是网络非常忙，几乎消耗了所有的带宽，仍然有大量数据等待网络读写；<br>–     另一种情况也可能是网络空闲，但由于路由等问题，导致包无法正常的到达。  </li>
+<li>另外一种出现 Wait on condition的常见情况是该线程在 sleep，等待 sleep的时间到了时候，将被唤醒。  </li>
+</ul>
+<p>•    <strong>Blocked</strong>：线程阻塞，是指当前线程执行过程中，所需要的资源长时间等待却一直未能获取到，被容器的线程管理器标识为阻塞状态，可以理解为等待资源超时的线程。   </p>
+<p>•    <strong>Waiting for monitor entry 和 in Object.wait()</strong>：Monitor是 Java中用以实现线程之间的互斥与协作的主要手段，它可以看成是对象或者 Class的锁。每一个对象都有，也仅有一个 monitor。从下图1中可以看出，每个 Monitor在某个时刻，只能被一个线程拥有，该线程就是 “Active Thread”，而其它线程都是 “Waiting Thread”，分别在两个队列 “ Entry Set”和 “Wait Set”里面等候。在 “Entry Set”中等待的线程状态是 “Waiting for monitor entry”，而在 “Wait Set”中等待的线程状态是 “in Object.wait()”。</p>
+<p><img src="https://i.loli.net/2017/12/06/5a278e71877cf.png" alt="java_monitor.png"></p>
+<p><strong>示例一：Waiting to lock 和 Blocked</strong><br>实例如下：  </p>
+<pre><code>&quot;RMI TCP Connection(267865)-172.16.5.25&quot; daemon prio=10 tid=0x00007fd508371000 nid=0x55ae waiting for monitor entry [0x00007fd4f8684000]
+   java.lang.Thread.State: BLOCKED (on object monitor)
+at org.apache.log4j.Category.callAppenders(Category.java:201)
+- waiting to lock &lt;0x00000000acf4d0c0&gt; (a org.apache.log4j.Logger)
+at org.apache.log4j.Category.forcedLog(Category.java:388)
+at org.apache.log4j.Category.log(Category.java:853)
+at org.apache.commons.logging.impl.Log4JLogger.warn(Log4JLogger.java:234)
+at com.tuan.core.common.lang.cache.remote.SpyMemcachedClient.get(SpyMemcachedClient.java:110)
+</code></pre><p>1）线程状态是 <strong>Blocked</strong>，阻塞状态。说明线程等待资源超时！<br>2）“ <font color="#DC143C"> waiting to lock <0x00000000acf4d0c0></0x00000000acf4d0c0></font>”指，线程在等待给这个 0x00000000acf4d0c0 地址上锁（英文可描述为：trying to obtain  0x00000000acf4d0c0 lock）。<br>3）在 dump 日志里查找字符串 0x00000000acf4d0c0，发现有大量线程都在等待给这个地址上锁。如果能在日志里找到谁获得了这个锁（如locked &lt; 0x00000000acf4d0c0 &gt;），就可以顺藤摸瓜了。<br>4）“<font color="#DC143C">waiting for monitor entry</font>”说明此线程通过 synchronized(obj) {……} 申请进入了临界区，从而进入了上图中的“Entry Set”队列，但该 obj 对应的 monitor 被其他线程拥有，所以本线程在 Entry Set 队列中等待。<br>5）第一行里，”<font color="#DC143C">RMI TCP Connection(267865)-172.16.5.25</font>“是 Thread Name 。tid指Java Thread id。nid指native线程的id。prio是线程优先级。[0x00007fd4f8684000]是线程栈起始地址。  </p>
+<p><strong>示例二：Waiting on condition 和 TIMED_WAITING</strong><br>实例如下：  </p>
+<pre><code>&quot;RMI TCP Connection(idle)&quot; daemon prio=10 tid=0x00007fd50834e800 nid=0x56b2 waiting on condition [0x00007fd4f1a59000]
+   java.lang.Thread.State: TIMED_WAITING (parking)
+at sun.misc.Unsafe.park(Native Method)
+- parking to wait for  &lt;0x00000000acd84de8&gt; (a java.util.concurrent.SynchronousQueue$TransferStack)
+at java.util.concurrent.locks.LockSupport.parkNanos(LockSupport.java:198)
+at java.util.concurrent.SynchronousQueue$TransferStack.awaitFulfill(SynchronousQueue.java:424)
+at java.util.concurrent.SynchronousQueue$TransferStack.transfer(SynchronousQueue.java:323)
+at java.util.concurrent.SynchronousQueue.poll(SynchronousQueue.java:874)
+at java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:945)
+at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:907)
+at java.lang.Thread.run(Thread.java:662)
+</code></pre><p>1）“<font color="#DC143C">TIMED_WAITING (parking)</font>”中的 timed_waiting 指等待状态，但这里指定了时间，到达指定的时间后自动退出等待状态；parking指线程处于挂起中。</p>
+<p>2）“<font color="#DC143C">waiting on condition</font>”需要与堆栈中的“<font color="#DC143C">parking to wait for  <0x00000000acd84de8> (a java.util.concurrent.SynchronousQueue$TransferStack)</0x00000000acd84de8></font>”结合来看。首先，本线程肯定是在等待某个条件的发生，来把自己唤醒。其次，SynchronousQueue 并不是一个队列，只是线程之间移交信息的机制，当我们把一个元素放入到 SynchronousQueue 中时必须有另一个线程正在等待接受移交的任务，因此这就是本线程在等待的条件。</p>
+<p><strong>示例三：in Obejct.wait() 和 TIMED_WAITING</strong><br>实例如下：  </p>
+<pre><code>&quot;RMI RenewClean-[172.16.5.19:28475]&quot; daemon prio=10 tid=0x0000000041428800 nid=0xb09 in Object.wait() [0x00007f34f4bd0000]
+   java.lang.Thread.State: TIMED_WAITING (on object monitor)
+at java.lang.Object.wait(Native Method)
+- waiting on &lt;0x00000000aa672478&gt; (a java.lang.ref.ReferenceQueue$Lock)
+at java.lang.ref.ReferenceQueue.remove(ReferenceQueue.java:118)
+- locked &lt;0x00000000aa672478&gt; (a java.lang.ref.ReferenceQueue$Lock)
+at sun.rmi.transport.DGCClient$EndpointEntry$RenewCleanThread.run(DGCClient.java:516)
+at java.lang.Thread.run(Thread.java:662)
+</code></pre><p>1）“<font color="#DC143C">TIMED_WAITING (on object monitor)</font>”，对于本例而言，是因为本线程调用了 java.lang.Object.wait(long timeout) 而进入等待状态。<br>2）“Wait Set”中等待的线程状态就是“ <font color="#DC143C">in Object.wait() </font>”。当线程获得了 Monitor，进入了临界区之后，如果发现线程继续运行的条件没有满足，它则调用对象（一般就是被 synchronized 的对象）的 wait() 方法，放弃了 Monitor，进入 “Wait Set”队列。只有当别的线程在该对象上调用了 notify() 或者 notifyAll() ，“ Wait Set”队列中线程才得到机会去竞争，但是只有一个线程获得对象的 Monitor，恢复到运行态。<br>3）RMI RenewClean 是 DGCClient 的一部分。DGC 指的是 Distributed GC，即分布式垃圾回收。<br>4）请注意，是先 <font color="#DC143C">locked <0x00000000aa672478></0x00000000aa672478></font>，后 <font color="#DC143C">waiting on <0x00000000aa672478></0x00000000aa672478></font>，之所以先锁再等同一个对象，请看下面它的代码实现：  </p>
+<pre><code>static private class  Lock { };
+private Lock lock = new Lock();
+public Reference&lt;? extends T&gt; remove(long timeout)
+{
+    synchronized (lock) {
+        Reference&lt;? extends T&gt; r = reallyPoll();
+        if (r != null) return r;
+        for (;;) {
+            lock.wait(timeout);
+            r = reallyPoll();
+               ……
+   }
+}
+</code></pre><p>即，线程的执行中，先用 synchronized 获得了这个对象的 Monitor（对应于 <font color="#DC143C"> locked <0x00000000aa672478></0x00000000aa672478></font> ）；当执行到 lock.wait(timeout);，线程就放弃了 Monitor 的所有权，进入“Wait Set”队列（对应于  <font color="#DC143C">waiting on <0x00000000aa672478> </0x00000000aa672478></font>）。<br>5）从堆栈信息看，是正在清理 remote references to remote objects ，引用的租约到了，分布式垃圾回收在逐一清理呢。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/linux/" rel="tag"># linux</a>
+          
+            <a href="/tags/accident-handling/" rel="tag"># accident handling</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/11/29/LeNet-5/" rel="next" title="卷积神经网络LeNet-5">
+                <i class="fa fa-chevron-left"></i> 卷积神经网络LeNet-5
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/12/06/product_handle_high_CPU/" rel="prev" title="线上问题处理-CPU过高">
+                线上问题处理-CPU过高 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+
+      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/head.jpg"
+                alt="zhaoxj0217" />
+            
+              <p class="site-author-name" itemprop="name">zhaoxj0217</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">25</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                
+                  <span class="site-state-item-count">17</span>
+                  <span class="site-state-item-name">分类</span>
+                
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">23</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          <div class="links-of-author motion-element">
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">zhaoxj0217</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.3"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

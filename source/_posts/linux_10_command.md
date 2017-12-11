@@ -195,3 +195,28 @@ TCP连接数可以用来判断性能问题是否由于建立了过多的连接�
 &emsp;排查Linux服务器性能问题还有很多工具，上面介绍的一些命令，可以帮助我们快速的定位问题。例如前面的示例输出，多个证据证明有JAVA进程占用了大量CPU资源，之后的性能调优就可以针对应用程序进行。 
 
 
+查询当前指定日志指定内容及上下文
+grep -20 "HTTP 500 Internal Server" info.log 
+
+对日志记录做多次grep过滤输出
+tail -f log | grep --line-buffer xxx | grep --line-buffer yyy
+ tail -f access.log |grep -E --line-buffer "whatislookfor|whatislookforlist"
+
+ tail -f access.log |grep -e --line-buffer "whatislookfor"
+
+
+当前目录多文件查找
+find . -name "access*"| xargs grep "whatislookfor"
+
+
+ll -t   按时间升序排列
+
+ll -rt  或者 ll -t|tac 按日期升序排列
+
+查看进程
+ps -ef | grep java
+
+chmod  777 **.*  赋权
+
+Linux 修改文件格式，vi  set ff 查看格式  set ff=dos  ,set ff=unix
+
